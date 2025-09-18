@@ -1,0 +1,275 @@
+/* ===== RESET Y BASE ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    overflow: hidden;
+}
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+#game-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+/* ===== PANTALLAS GENERALES ===== */
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease;
+}
+
+.screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ===== PANTALLA DE CARGA ===== */
+#loading h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.loading-bar {
+    width: 300px;
+    height: 20px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.loading-progress {
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+    transition: width 0.3s ease;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ===== MENÚ PRINCIPAL ===== */
+#menu h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+    text-align: center;
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* ===== BOTONES ===== */
+.btn {
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 200px;
+    font-weight: bold;
+}
+
+.btn.primary {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+}
+
+.btn.secondary {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.btn.primary:hover {
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+}
+
+.btn.secondary:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* ===== PANTALLA DE JUEGO ===== */
+#game {
+    justify-content: flex-start;
+    padding: 0;
+}
+
+#hud {
+    width: 100%;
+    background: rgba(0,0,0,0.7);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    z-index: 100;
+}
+
+.hud-section {
+    display: flex;
+    gap: 20px;
+}
+
+.hud-section span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.weather {
+    background: rgba(255,255,255,0.1);
+    padding: 5px 15px;
+    border-radius: 20px;
+}
+
+#phaser-game {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #87CEEB; /* Color cielo */
+}
+
+#controls {
+    width: 100%;
+    background: rgba(0,0,0,0.7);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    z-index: 100;
+}
+
+.control-btn {
+    padding: 12px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+.control-btn:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-1px);
+}
+
+.control-btn.primary {
+    background: linear-gradient(135deg, #FF6B35, #F7931E);
+    border-color: transparent;
+}
+
+.control-btn.primary:hover {
+    background: linear-gradient(135deg, #F7931E, #FF6B35);
+}
+
+/* ===== TUTORIAL ===== */
+#tutorial {
+    max-width: 600px;
+    padding: 20px;
+}
+
+#tutorial h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.tutorial-content {
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.tutorial-content ul {
+    list-style: none;
+    padding: 0;
+}
+
+.tutorial-content li {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.tutorial-content li:last-child {
+    border-bottom: none;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    #hud {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    .hud-section {
+        gap: 15px;
+        font-size: 12px;
+    }
+    
+    #controls {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .control-btn {
+        flex: 1;
+        min-width: 120px;
+        font-size: 0.9rem;
+    }
+    
+    #menu h1 {
+        font-size: 2rem;
+    }
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.screen:not(.hidden) {
+    animation: fadeIn 0.5s ease;
+}
