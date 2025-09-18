@@ -1,382 +1,382 @@
-// ===== CONFIGURACIÓN GLOBAL =====
-const GAME_CONFIG = {
-    width: 800,
-    height: 500,
-    backgroundColor: '#87CEEB',
-    parent: 'phaser-game'
-};
+/**
+ * script.js - Archivo principal que inicializa todo
+ */
 
-// ===== VARIABLES GLOBALES =====
-let currentScreen = 'loading';
+// Variables globales
 let game = null;
-let gameState = {
-    money: 1000,
-    energy: 100,
-    day: 1,
-    weather: {
-        temperature: 25,
-        precipitation: 2,
-        solar: 18
-    }
-};
+let hud = null;
+let currentLoadingProgress = 0;
 
-// ===== CLASE PRINCIPAL DEL JUEGO =====
-class Game {
-    constructor() {
-        this.phaserGame = null;
-        this.player = null;
-        this.farm = null;
-        this.initPhaser();
-    }
-
-    initPhaser() {
-        const config = {
-            type: Phaser.AUTO,
-            width: GAME_CONFIG.width,
-            height: GAME_CONFIG.height,
-            backgroundColor: GAME_CONFIG.backgroundColor,
-            parent: GAME_CONFIG.parent,
-            scene: {
-                preload: this.preload.bind(this),
-                create: this.create.bind(this),
-                update: this.update.bind(this)
-            }
-        };
-        
-        this.phaserGame = new Phaser.Game(config);
-    }
-
-    preload() {
-        // Por ahora, creamos gráficos simples con código
-        this.load.image('pixel', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
-    }
-
-    create() {
-        console.log('🎮 Juego iniciado');
-        
-        // Crear el jugador
-        this.player = new Player(this.phaserGame.scene.scenes[0], 100, 250);
-        
-        // Crear la granja
-        this.farm = new Farm(this.phaserGame.scene.scenes[0], 5, 3);
-        
-        // Configurar interacciones
-        this.setupInteractions();
-    }
-
-    update() {
-        // Lógica de actualización del juego
-    }
-
-    setupInteractions() {
-        const scene = this.phaserGame.scene.scenes[0];
-        
-        // Hacer clic en la granja para plantar
-        scene.input.on('pointerdown', (pointer) => {
-            const farmClick = this.farm.handleClick(pointer.x, pointer.y);
-            if (farmClick) {
-                console.log('🌱 Plantando en posición:', farmClick);
-            }
-        });
-    }
-}
-
-// ===== CLASE PLAYER =====
-class Player {
-    constructor(scene, x, y) {
-        this.scene = scene;
-        this.money = gameState.money;
-        this.energy = gameState.energy;
-        
-        // Crear sprite simple del jugador
-        this.sprite = scene.add.rectangle(x, y, 20, 30, 0x4CAF50);
-        this.sprite.setStrokeStyle(2, 0x2E7D32);
-    }
-
-    move(x, y) {
-        this.sprite.setPosition(x, y);
-    }
-
-    canAfford(cost) {
-        return this.money >= cost;
-    }
-
-    spendMoney(amount) {
-        if (this.canAfford(amount)) {
-            this.money -= amount;
-            gameState.money = this.money;
-            updateHUD();
-            return true;
-        }
-        return false;
-    }
-
-    gainMoney(amount) {
-        this.money += amount;
-        gameState.money = this.money;
-        updateHUD();
-    }
-}
-
-// ===== CLASE FARM =====
-class Farm {
-    constructor(scene, width = 5, height = 3) {
-        this.scene = scene;
-        this.width = width;
-        this.height = height;
-        this.crops = new Array(width * height).fill(null);
-        this.gridStartX = 250;
-        this.gridStartY = 150;
-        this.cellSize = 60;
-        
-        this.createGrid();
-    }
-
-    createGrid() {
-        this.gridGraphics = [];
-        
-        for (let x = 0; x < this.width; x++) {
-            for (let y = 0; y < this.height; y++) {
-                const posX = this.gridStartX + x * this.cellSize;
-                const posY = this.gridStartY + y * this.cellSize;
-                
-                // Crear celda de la granja
-                const cell = this.scene.add.rectangle(
-                    posX, posY, 
-                    this.cellSize - 5, this.cellSize - 5, 
-                    0x8B4513
-                );
-                cell.setStrokeStyle(2, 0x654321);
-                
-                this.gridGraphics.push(cell);
-            }
-        }
-    }
-
-    handleClick(x, y) {
-        // Verificar si el clic está dentro de la granja
-        const gridX = Math.floor((x - this.gridStartX + this.cellSize/2) / this.cellSize);
-        const gridY = Math.floor((y - this.gridStartY + this.cellSize/2) / this.cellSize);
-        
-        if (gridX >= 0 && gridX < this.width && gridY >= 0 && gridY < this.height) {
-            const index = gridX + gridY * this.width;
-            
-            if (this.crops[index] === null) {
-                // Plantar cultivo
-                if (game.player.spendMoney(50)) {
-                    this.plantCrop(gridX, gridY, 'tomato');
-                    return { x: gridX, y: gridY, action: 'plant' };
-                }
-            } else {
-                // Interactuar con cultivo existente
-                const crop = this.crops[index];
-                if (crop.canHarvest()) {
-                    const harvest = crop.harvest();
-                    game.player.gainMoney(harvest.value);
-                    this.crops[index] = null;
-                    crop.destroy();
-                    return { x: gridX, y: gridY, action: 'harvest', value: harvest.value };
-                }
-            }
-        }
-        
-        return null;
-    }
-
-    plantCrop(gridX, gridY, cropType) {
-        const posX = this.gridStartX + gridX * this.cellSize;
-        const posY = this.gridStartY + gridY * this.cellSize;
-        const index = gridX + gridY * this.width;
-        
-        this.crops[index] = new Crop(this.scene, cropType, posX, posY);
-    }
-
-    updateCrops() {
-        this.crops.forEach(crop => {
-            if (crop) {
-                crop.grow(gameState.weather);
-            }
-        });
-    }
-}
-
-// ===== CLASE CROP =====
-class Crop {
-    constructor(scene, type, x, y) {
-        this.scene = scene;
-        this.type = type;
-        this.growth = 0; // 0 = semilla, 100 = maduro
-        this.waterLevel = 50;
-        this.health = 100;
-        
-        // Crear sprite visual del cultivo
-        this.sprite = scene.add.circle(x, y, 8, 0x4CAF50);
-        this.updateVisual();
-    }
-
-    grow(weatherData) {
-        // Lógica simple de crecimiento
-        if (this.waterLevel > 20 && weatherData.temperature > 10) {
-            this.growth += 2;
-            this.waterLevel -= 1;
-            
-            // Aplicar efectos del clima
-            if (weatherData.temperature > 30) {
-                this.waterLevel -= 2; // Más calor = más agua necesaria
-            }
-            
-            if (weatherData.precipitation > 5) {
-                this.waterLevel += 5; // Lluvia añade agua
-            }
-            
-            this.growth = Math.min(100, this.growth);
-            this.waterLevel = Math.max(0, Math.min(100, this.waterLevel));
-            
-            this.updateVisual();
-        }
-    }
-
-    water() {
-        this.waterLevel = Math.min(100, this.waterLevel + 30);
-        this.updateVisual();
-    }
-
-    updateVisual() {
-        // Cambiar color basado en crecimiento
-        if (this.growth < 25) {
-            this.sprite.setFillStyle(0x8BC34A); // Verde claro (semilla)
-        } else if (this.growth < 50) {
-            this.sprite.setFillStyle(0x4CAF50); // Verde (creciendo)
-        } else if (this.growth < 75) {
-            this.sprite.setFillStyle(0x2E7D32); // Verde oscuro (casi maduro)
-        } else {
-            this.sprite.setFillStyle(0xFF6B35); // Naranja (maduro)
-        }
-        
-        // Cambiar tamaño basado en crecimiento
-        const size = 8 + (this.growth / 100) * 12;
-        this.sprite.setRadius(size);
-    }
-
-    canHarvest() {
-        return this.growth >= 75;
-    }
-
-    harvest() {
-        if (this.canHarvest()) {
-            const value = Math.floor(this.growth * 0.8); // 60-80 monedas
-            return { yield: this.growth, value: value };
-        }
-        return null;
-    }
-
-    destroy() {
-        this.sprite.destroy();
-    }
-}
-
-// ===== GESTIÓN DE PANTALLAS =====
-function showScreen(screenName) {
-    // Ocultar todas las pantallas
-    document.querySelectorAll('.screen').forEach(screen => {
-        screen.classList.add('hidden');
-    });
-    
-    // Mostrar la pantalla solicitada
-    document.getElementById(screenName).classList.remove('hidden');
-    currentScreen = screenName;
-    
-    console.log(`📺 Mostrando pantalla: ${screenName}`);
-}
-
-function updateHUD() {
-    document.getElementById('money').textContent = gameState.money;
-    document.getElementById('energy').textContent = gameState.energy;
-    document.getElementById('day').textContent = gameState.day;
-    document.getElementById('temperature').textContent = gameState.weather.temperature + '°C';
-    document.getElementById('precipitation').textContent = gameState.weather.precipitation + 'mm';
-    document.getElementById('solar').textContent = gameState.weather.solar + 'kW';
-}
-
-// ===== INICIALIZACIÓN =====
+// Inicialización cuando el DOM está listo
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 NASA Farm Navigator iniciando...');
     
-    // Simular carga
-    let progress = 0;
-    const loadingInterval = setInterval(() => {
-        progress += Math.random() * 30;
-        document.querySelector('.loading-progress').style.width = Math.min(progress, 100) + '%';
-        
-        if (progress >= 100) {
-            clearInterval(loadingInterval);
-            setTimeout(() => {
-                showScreen('menu');
-            }, 500);
-        }
-    }, 200);
+    // Iniciar pantalla de carga
+    startLoadingSequence();
     
-    // Event listeners para botones del menú
-    document.getElementById('play-btn').addEventListener('click', () => {
-        showScreen('game');
-        updateHUD();
-        
-        // Inicializar el juego de Phaser
-        setTimeout(() => {
-            game = new Game();
-        }, 100);
-    });
+    // Configurar event listeners
+    setupEventListeners();
     
-    document.getElementById('tutorial-btn').addEventListener('click', () => {
-        showScreen('tutorial');
-    });
-    
-    document.getElementById('back-to-menu').addEventListener('click', () => {
-        showScreen('menu');
-    });
-    
-    // Event listeners para controles del juego
-    document.getElementById('plant-btn').addEventListener('click', () => {
-        console.log('🌱 Modo plantar activado');
-        // La lógica de plantado se maneja en el clic del canvas
-    });
-    
-    document.getElementById('water-btn').addEventListener('click', () => {
-        console.log('💧 Regando cultivos...');
-        if (game && game.farm) {
-            game.farm.crops.forEach(crop => {
-                if (crop) crop.water();
-            });
-        }
-    });
-    
-    document.getElementById('harvest-btn').addEventListener('click', () => {
-        console.log('🌾 Cosechando...');
-        // La lógica de cosecha se maneja en el clic individual de cada cultivo
-    });
-    
-    document.getElementById('next-day-btn').addEventListener('click', () => {
-        nextDay();
-    });
+    // Configurar debug si está habilitado
+    if (window.location.search.includes('debug=true')) {
+        DebugUtils.enable();
+    }
 });
 
-// ===== LÓGICA DEL JUEGO =====
-function nextDay() {
-    gameState.day++;
-    gameState.energy = 100;
+// Secuencia de carga
+async function startLoadingSequence() {
+    const loadingSteps = [
+        { name: 'Inicializando sistema...', duration: 500 },
+        { name: 'Cargando recursos...', duration: 800 },
+        { name: 'Conectando con NASA...', duration: 1000 },
+        { name: 'Preparando granja...', duration: 600 },
+        { name: 'Finalizando...', duration: 300 }
+    ];
     
-    // Simular cambio de clima (más tarde conectaremos con NASA API)
-    gameState.weather.temperature = 15 + Math.random() * 20;
-    gameState.weather.precipitation = Math.random() * 10;
-    gameState.weather.solar = 10 + Math.random() * 15;
-    
-    // Actualizar cultivos
-    if (game && game.farm) {
-        game.farm.updateCrops();
+    for (let i = 0; i < loadingSteps.length; i++) {
+        const step = loadingSteps[i];
+        
+        // Actualizar texto de carga
+        const loadingText = document.querySelector('#loading p');
+        if (loadingText) {
+            loadingText.textContent = step.name;
+        }
+        
+        // Actualizar barra de progreso
+        updateLoadingProgress((i + 1) / loadingSteps.length * 100);
+        
+        // Esperar
+        await TimeUtils.delay(step.duration);
+        
+        // Ejecutar acciones específicas de cada paso
+        await executeLoadingStep(i);
     }
     
-    updateHUD();
-    console.log(`🌅 Nuevo día: ${gameState.day}`);
+    // Completar carga
+    completeLoading();
 }
 
-console.log('✅ Script principal cargado');
+// Actualizar progreso de carga
+function updateLoadingProgress(progress) {
+    currentLoadingProgress = progress;
+    const progressBar = document.querySelector('.loading-progress');
+    if (progressBar) {
+        progressBar.style.width = Math.min(progress, 100) + '%';
+    }
+}
+
+// Ejecutar acciones específicas de carga
+async function executeLoadingStep(stepIndex) {
+    switch (stepIndex) {
+        case 0: // Inicializar sistema
+            // Verificar compatibilidad del navegador
+            break;
+            
+        case 1: // Cargar recursos
+            // Precargar assets si fuera necesario
+            break;
+            
+        case 2: // Conectar con NASA
+            try {
+                const isAPIAvailable = await nasaAPI.checkAPIStatus();
+                if (!isAPIAvailable) {
+                    console.log('⚠️ NASA API no disponible, usando datos simulados');
+                }
+            } catch (error) {
+                console.log('⚠️ Error verificando NASA API:', error);
+            }
+            break;
+            
+        case 3: // Preparar granja
+            // Inicializar datos base del juego
+            break;
+            
+        case 4: // Finalizar
+            // Últimos ajustes
+            break;
+    }
+}
+
+// Completar secuencia de carga
+function completeLoading() {
+    setTimeout(() => {
+        ScreenManager.show('menu');
+        showWelcomeMessage();
+    }, 500);
+}
+
+// Configurar event listeners
+function setupEventListeners() {
+    // Botones del menú principal
+    document.getElementById('play-btn')?.addEventListener('click', startGame);
+    document.getElementById('tutorial-btn')?.addEventListener('click', showTutorial);
+    document.getElementById('about-btn')?.addEventListener('click', showAbout);
+    document.getElementById('back-to-menu')?.addEventListener('click', backToMenu);
+    
+    // Controles del juego
+    document.getElementById('plant-btn')?.addEventListener('click', activatePlantMode);
+    document.getElementById('water-btn')?.addEventListener('click', waterAllCrops);
+    document.getElementById('harvest-btn')?.addEventListener('click', activateHarvestMode);
+    document.getElementById('next-day-btn')?.addEventListener('click', nextDay);
+    
+    // Eventos de teclado global
+    document.addEventListener('keydown', handleGlobalKeyboard);
+    
+    // Eventos de ventana
+    window.addEventListener('beforeunload', saveGameState);
+    window.addEventListener('resize', handleWindowResize);
+}
+
+// Funciones de navegación
+function startGame() {
+    console.log('🎮 Iniciando juego...');
+    
+    ScreenManager.show('game');
+    
+    // Inicializar juego con un pequeño delay para asegurar que el DOM esté listo
+    setTimeout(() => {
+        initializeGame();
+    }, 100);
+}
+
+function showTutorial() {
+    ScreenManager.show('tutorial');
+}
+
+function showAbout() {
+    // Placeholder para pantalla "Acerca de"
+    alert('🌱 NASA Farm Navigator\n\nSimulador agrícola que utiliza datos reales de la NASA para crear una experiencia educativa sobre agricultura y clima.\n\nDesarrollado con Phaser.js y NASA POWER API.');
+}
+
+function backToMenu() {
+    ScreenManager.show('menu');
+    
+    // Limpiar juego si existe
+    if (game) {
+        game.destroy();
+        game = null;
+    }
+}
+
+// Inicializar el juego principal
+function initializeGame() {
+    try {
+        // Crear nueva instancia del juego
+        game = new Game();
+        
+        // El HUD se crea automáticamente en la clase Game
+        hud = game.getHUD();
+        
+        // Mostrar tip inicial
+        setTimeout(() => {
+            TutorialUtils.showTip();
+        }, 2000);
+        
+        console.log('✅ Juego inicializado correctamente');
+        
+    } catch (error) {
+        console.error('❌ Error inicializando juego:', error);
+        
+        // Mostrar mensaje de error al usuario
+        alert('Error al inicializar el juego. Por favor, recarga la página.');
+        backToMenu();
+    }
+}
+
+// Funciones de control del juego
+function activatePlantMode() {
+    console.log('🌱 Modo plantar activado');
+    SoundUtils.playPlant();
+    
+    if (hud) {
+        hud.showNotification('🌱 Haz clic en una celda vacía para plantar', 'info', 3000);
+    }
+}
+
+function waterAllCrops() {
+    console.log('💧 Regando todos los cultivos...');
+    
+    if (game) {
+        const success = game.waterCrops();
+        SoundUtils.playWater();
+        
+        if (!success && hud) {
+            hud.showInsufficientEnergy();
+        }
+    }
+}
+
+function activateHarvestMode() {
+    console.log('🌾 Modo cosechar activado');
+    
+    if (hud) {
+        hud.showNotification('🌾 Haz clic en cultivos maduros (naranjas) para cosechar', 'info', 3000);
+    }
+}
+
+async function nextDay() {
+    console.log('🌅 Avanzando al siguiente día...');
+    
+    if (!game) {
+        console.error('❌ Juego no inicializado');
+        return;
+    }
+    
+    try {
+        // Obtener nuevo clima de la NASA API
+        const newWeather = await nasaAPI.getNextDayWeather();
+        
+        // Actualizar estado del juego
+        gameState.updateWeather(newWeather);
+        gameState.nextDay();
+        
+        // Actualizar juego
+        if (game.getCurrentScene()) {
+            game.getCurrentScene().farm.updateCrops(newWeather);
+        }
+        
+        SoundUtils.playNextDay();
+        
+        // Mostrar información del nuevo día
+        const weatherDesc = WeatherUtils.getWeatherDescription(newWeather);
+        if (hud) {
+            hud.showNotification(`🌅 Día ${gameState.getDay()}: ${weatherDesc}`, 'info', 4000);
+        }
+        
+        // Mostrar tip ocasionalmente
+        if (Math.random() < 0.3) {
+            setTimeout(() => TutorialUtils.showTip(), 1500);
+        }
+        
+    } catch (error) {
+        console.error('❌ Error avanzando día:', error);
+        
+        // Fallback: usar clima simulado
+        gameState.nextDay();
+        if (game.getCurrentScene()) {
+            game.getCurrentScene().farm.updateCrops(gameState.getWeather());
+        }
+    }
+}
+
+// Manejo de eventos globales
+function handleGlobalKeyboard(event) {
+    // Teclas globales que funcionan en cualquier pantalla
+    switch (event.code) {
+        case 'F1':
+            event.preventDefault();
+            showTutorial();
+            break;
+            
+        case 'Escape':
+            if (ScreenManager.getCurrent() === 'game') {
+                backToMenu();
+            }
+            break;
+            
+        case 'KeyD':
+            if (event.ctrlKey) {
+                event.preventDefault();
+                DebugUtils.enabled ? DebugUtils.disable() : DebugUtils.enable();
+            }
+            break;
+    }
+    
+    // Teclas específicas del juego
+    if (ScreenManager.getCurrent() === 'game' && game) {
+        switch (event.code) {
+            case 'Space':
+                event.preventDefault();
+                nextDay();
+                break;
+                
+            case 'KeyW':
+                event.preventDefault();
+                waterAllCrops();
+                break;
+                
+            case 'KeyR':
+                if (event.ctrlKey) {
+                    event.preventDefault();
+                    restartGame();
+                }
+                break;
+        }
+    }
+}
+
+// Funciones auxiliares
+function showWelcomeMessage() {
+    console.log('👋 Bienvenido a NASA Farm Navigator');
+    
+    // Mostrar mensaje de bienvenida si es la primera vez
+    const isFirstTime = !StorageUtils.exists('nasa_farm_played');
+    
+    if (isFirstTime) {
+        setTimeout(() => {
+            if (confirm('👋 ¡Bienvenido a NASA Farm Navigator!\n\n¿Te gustaría ver el tutorial antes de empezar?')) {
+                showTutorial();
+            }
+            StorageUtils.save('nasa_farm_played', true);
+        }, 1000);
+    }
+}
+
+function saveGameState() {
+    if (gameState && gameState.isGameStarted()) {
+        const saveData = gameState.getGameData();
+        StorageUtils.save('nasa_farm_save', saveData);
+        console.log('💾 Progreso guardado');
+    }
+}
+
+function loadGameState() {
+    const saveData = StorageUtils.load('nasa_farm_save');
+    if (saveData) {
+        gameState.loadGameData(saveData);
+        console.log('📂 Progreso cargado');
+        return true;
+    }
+    return false;
+}
+
+function restartGame() {
+    if (confirm('🔄 ¿Estás seguro de que quieres reiniciar el juego?')) {
+        if (game) {
+            game.restart();
+        }
+        StorageUtils.remove('nasa_farm_save');
+        console.log('🔄 Juego reiniciado');
+    }
+}
+
+function handleWindowResize() {
+    // Ajustar interfaz si es necesario
+    if (game && game.phaserGame) {
+        // Phaser maneja el resize automáticamente con la configuración actual
+        console.log('📐 Ventana redimensionada');
+    }
+}
+
+// Manejo de errores globales
+window.addEventListener('error', (event) => {
+    console.error('💥 Error global:', event.error);
+    
+    // Intentar recuperación graceful
+    if (ScreenManager.getCurrent() === 'game') {
+        if (confirm('❌ Ha ocurrido un error. ¿Quieres volver al menú principal?')) {
+            backToMenu();
+        }
+    }
+});
+
+// Función de limpieza al cerrar
+window.addEventListener('beforeunload', () => {
+    saveGameState();
+    
+    if (game) {
+        game.destroy();
+    }
+});
+
+console.log('✅ Script principal cargado y listo');
