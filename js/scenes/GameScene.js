@@ -16,6 +16,10 @@ class GameScene extends Phaser.Scene {
         this.load.image('pixel', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
         
         // Aquí podrían cargarse más assets en el futuro
+
+        this.load.image('corn_seed', 'assets/images/crops/corn.png');
+
+        console.log("Assets precargados para GameScene")
     }
 
     create() {
