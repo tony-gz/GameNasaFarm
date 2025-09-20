@@ -20,7 +20,13 @@ class GameScene extends Phaser.Scene {
         this.load.image('corn_seed', 'assets/images/crops/corn.png');
         this.load.image('corn_stage1', 'assets/images/crops/corn_stage1.png');
         this.load.image('corn_stage2', 'assets/images/crops/corn_stage2.png');
-        this.load.image('corn_stage3', 'assets/images/crops/corn_stage3.png');
+        this.load.image('corn_mature', 'assets/images/crops/corn_mature.png');
+        this.load.image('corn_dead', 'assets/images/crops/corn_dead.png');
+        this.load.image('tomato_seed', 'assets/images/crops/tomato_seed.png');
+        this.load.image('tomato_stage1', 'assets/images/crops/tomato_stage1.png');
+        this.load.image('tomato_stage2', 'assets/images/crops/tomato_stage2.png');
+        this.load.image('tomato_mature', 'assets/images/crops/tomato_mature.png');
+        this.load.image('tomato_dead', 'assets/images/crops/tomato_dead.png');
     
 
         console.log("Assets precargados para GameScene")
