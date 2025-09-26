@@ -9,6 +9,7 @@ class Game {
         this.farm = null;
         this.hud = null;
         this.currentScene = null;
+        this.backgroundScene = null; // Nueva referencia a la escena de fondo
         
         this.config = {
             type: Phaser.AUTO,
@@ -16,7 +17,8 @@ class Game {
             height: 500,
             backgroundColor: '#87CEEB',
             parent: 'phaser-game',
-            scene: GameScene,
+            // Cambio principal: ahora tenemos múltiples escenas
+            scene: [BackgroundScene, GameScene], // BackgroundScene primero para que esté detrás
             physics: {
                 default: 'arcade',
                 arcade: {
@@ -54,13 +56,21 @@ class Game {
 
     onPhaserReady() {
         this.currentScene = this.phaserGame.scene.getScene('GameScene');
+        this.backgroundScene = this.phaserGame.scene.getScene('BackgroundScene'); // Nueva referencia
         
-        if (this.currentScene) {
-            // Obtener referencias a las entidades creadas en la escena
+        if (this.currentScene && this.backgroundScene) {
+            // Obtener referencias a las entidades creadas en la escena principal
             this.player = this.currentScene.player;
             this.farm = this.currentScene.farm;
             
-            console.log('🎮 Juego completamente inicializado');
+            // Iniciar ambas escenas
+            this.phaserGame.scene.start('BackgroundScene');
+            this.phaserGame.scene.start('GameScene');
+            
+            // Configurar la escena principal para que esté por encima del fondo
+            this.phaserGame.scene.bringToTop('GameScene');
+            
+            console.log('🎮 Juego completamente inicializado con fondo');
         }
     }
 
@@ -81,6 +91,29 @@ class Game {
         return this.currentScene;
     }
 
+    getBackgroundScene() {
+        return this.backgroundScene;
+    }
+
+    // Nuevos métodos para controlar el fondo
+    setParallaxSpeed(multiplier) {
+        if (this.backgroundScene) {
+            this.backgroundScene.setParallaxSpeed(multiplier);
+        }
+    }
+
+    addFogEffect() {
+        if (this.backgroundScene) {
+            this.backgroundScene.addFogEffect();
+        }
+    }
+
+    addParticleEffects() {
+        if (this.backgroundScene) {
+            this.backgroundScene.addParticleEffects();
+        }
+    }
+
     // Métodos de control del juego
     plantCrop(cropType = 'tomato') {
         if (!this.farm) {
@@ -88,8 +121,6 @@ class Game {
             return false;
         }
 
-        // Esta función se usaría para plantar en una posición específica
-        // Por ahora, la lógica de plantado se maneja en los clicks
         console.log(`🌱 Modo plantar ${cropType} activado`);
         return true;
     }
@@ -128,6 +159,7 @@ class Game {
     pause() {
         if (this.phaserGame) {
             this.phaserGame.scene.pause('GameScene');
+            this.phaserGame.scene.pause('BackgroundScene'); // Pausar también el fondo
             console.log('⏸️ Juego pausado');
         }
     }
@@ -135,6 +167,7 @@ class Game {
     resume() {
         if (this.phaserGame) {
             this.phaserGame.scene.resume('GameScene');
+            this.phaserGame.scene.resume('BackgroundScene'); // Reanudar también el fondo
             console.log('▶️ Juego reanudado');
         }
     }
@@ -145,8 +178,9 @@ class Game {
         // Resetear estado
         gameState.reset();
         
-        // Reiniciar escena
+        // Reiniciar ambas escenas
         if (this.phaserGame) {
+            this.phaserGame.scene.restart('BackgroundScene');
             this.phaserGame.scene.restart('GameScene');
         }
     }
@@ -171,6 +205,7 @@ class Game {
         this.player = null;
         this.farm = null;
         this.currentScene = null;
+        this.backgroundScene = null; // Limpiar nueva referencia
         
         // Limpiar referencia global
         if (window.game === this) {
