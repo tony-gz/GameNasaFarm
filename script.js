@@ -26,11 +26,11 @@ document.addEventListener('DOMContentLoaded', function() {
 // Secuencia de carga
 async function startLoadingSequence() {
     const loadingSteps = [
-        { name: 'Inicializando sistema...', duration: 500 },
-        { name: 'Cargando recursos...', duration: 800 },
-        { name: 'Conectando con NASA...', duration: 1000 },
-        { name: 'Preparando granja...', duration: 600 },
-        { name: 'Finalizando...', duration: 300 }
+        { name: 'Inicializando sistema...', duration: 50 }, //500
+        { name: 'Cargando recursos...', duration: 40 }, //800
+        { name: 'Conectando con NASA...', duration: 10 }, //1000
+        { name: 'Preparando granja...', duration: 60 }, //600
+        { name: 'Finalizando...', duration: 30 } //300
     ];
     
     for (let i = 0; i < loadingSteps.length; i++) {
