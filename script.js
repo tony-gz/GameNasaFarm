@@ -1,5 +1,6 @@
 /**
  * script.js - Archivo principal que inicializa todo
+ giova
  */
 
 // Variables globales
