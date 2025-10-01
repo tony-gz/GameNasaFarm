@@ -11,9 +11,9 @@ class Player {
   }
 
   init() {
-    this.sprite = this.scene.add.sprite(this.x, this.y, 'player', 3);
-    this.sprite.setScale(0.2);
+    this.sprite = this.scene.add.sprite(this.x, this.y, "player", 3);
     this.sprite.setOrigin(0.5, 0.5); // Mantén el origen centrado
+    this.sprite.setScale(0.2);
     console.log("🧑‍🌾 Jugador creado con imagen PNG en:", this.x, this.y);
   }
 
@@ -24,6 +24,28 @@ class Player {
     if (this.sprite) {
       this.sprite.setPosition(x, y);
     }
+  }
+
+  toRight() {
+    const position = this.getPosition();
+    let newX;
+    if ((position.x >= 775)) {
+      newX = 775;
+    } else {
+      newX = position.x + 2;
+    }
+    this.move(newX, position.y);
+  }
+
+  toLeft() {
+    const position = this.getPosition();
+    let newX;
+    if ((position.x <= 25)) {
+      newX = 20;
+    } else {
+      newX = position.x - 2;
+    }
+    this.move(newX, position.y);
   }
 
   // Métodos de economía que ahora usan GameState
