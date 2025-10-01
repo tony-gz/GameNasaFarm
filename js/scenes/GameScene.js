@@ -1,7 +1,3 @@
-/**
- * GameScene.js - Escena principal del juego
- */
-
 class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });
@@ -16,33 +12,15 @@ class GameScene extends Phaser.Scene {
         this.load.image('pixel', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
         
         // Aquí podrían cargarse más assets en el futuro
-
-        this.load.image('corn_seed', 'assets/images/crops/corn.png');
-        this.load.image('corn_stage1', 'assets/images/crops/corn_stage1.png');
-        this.load.image('corn_stage2', 'assets/images/crops/corn_stage2.png');
-        this.load.image('corn_mature', 'assets/images/crops/corn_mature.png');
-        this.load.image('corn_dead', 'assets/images/crops/corn_dead.png');
-        this.load.image('tomato_seed', 'assets/images/crops/tomato_seed.png');
-        this.load.image('tomato_stage1', 'assets/images/crops/tomato_stage1.png');
-        this.load.image('tomato_stage2', 'assets/images/crops/tomato_stage2.png');
-        this.load.image('tomato_mature', 'assets/images/crops/tomato_mature.png');
-        this.load.image('tomato_dead', 'assets/images/crops/tomato_dead.png');
-        this.load.image('wheat_seed', 'assets/images/crops/wheat_seed.png');
-        this.load.image('wheat_stage1', 'assets/images/crops/wheat_stage1.png');
-        this.load.image('wheat_stage2', 'assets/images/crops/wheat_stage2.png');  
-        this.load.image('wheat_stage3', 'assets/images/crops/wheat_stage3.png'); 
-        this.load.image('wheat_mature', 'assets/images/crops/wheat_mature.png'); 
-        this.load.image('wheat_dead', 'assets/images/crops/wheat_dead.png');
-    
-
-        console.log("Assets precargados para GameScene")
     }
 
     create() {
         console.log('🎮 GameScene creada');
         
-        // Crear fondo
-        this.createBackground();
+        // IMPORTANTE: Hacer el fondo de la cámara transparente para ver BackgroundScene
+        this.cameras.main.setBackgroundColor('rgba(0, 0, 0, 0)');
+        
+        // NO crear fondo aquí - se maneja en BackgroundScene
         
         // Crear jugador
         this.player = new Player(this, 100, 250);
@@ -58,19 +36,6 @@ class GameScene extends Phaser.Scene {
         
         // Almacenar referencias globalmente para fácil acceso
         window.gameScene = this;
-    }
-
-    createBackground() {
-        // Crear un fondo simple con gradiente de cielo
-        const graphics = this.add.graphics();
-        
-        // Cielo
-        graphics.fillGradientStyle(0x87CEEB, 0x87CEEB, 0xE0F6FF, 0xE0F6FF, 1);
-        graphics.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height * 0.7);
-        
-        // Tierra
-        graphics.fillStyle(0x8B4513);
-        graphics.fillRect(0, this.cameras.main.height * 0.7, this.cameras.main.width, this.cameras.main.height * 0.3);
     }
 
     setupInteractions() {
