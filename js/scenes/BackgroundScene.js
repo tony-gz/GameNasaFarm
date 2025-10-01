@@ -9,10 +9,11 @@ class BackgroundScene extends Phaser.Scene {
         
         this.load.image('sky_gradient', 'assets/backgrounds/sky_gradient.png');
         this.load.image('mountains_far', 'assets/backgrounds/mountains_dark.png');
-        this.load.image('mountains_mid', 'assets/backgrounds/mountains_blue.png');
+        //this.load.image('mountains_mid', 'assets/backgrounds/mountains_blue.png');
         this.load.image('hills_dark', 'assets/backgrounds/hills_dark.png');
         this.load.image('forest_line', 'assets/backgrounds/forest_line.png');
         this.load.image('clouds', 'assets/backgrounds/clouds.png');
+        this.load.image('ground_soil', 'assets/backgrounds/ground_soil.png'); // Nueva imagen de suelo
     }
 
     create() {
@@ -23,37 +24,37 @@ class BackgroundScene extends Phaser.Scene {
         // 1. CIELO - Gradiente detallado
         this.createDetailedSky(width, height);
         
-        // 2. NUBES DE FONDO - Capa lejana
-        this.createCloudLayer(80, 180, 4, 0.25);
+        // 2. NUBES - Una sola capa desde el borde superior
+        this.createCloudLayer(0, 100, 5, 0.3);
         
-        // 3. MONTAÑAS LEJANAS - Más oscuras y pequeñas
-        this.createMountainLayer('mountains_far', height * 0.48, 0.08, 0.5, 0.8);
+        // 3. MONTAÑAS MUY LEJANAS - Color original sin modificar
+        //this.createMountainLayer('mountains_mid', height * 0.35, 0.05, 1, 0.5);
         
-        // 4. MONTAÑAS MEDIAS - Azules
-        this.createMountainLayer('mountains_mid', height * 0.58, 0.15, 0.7, 1.2);
+        // 4. MONTAÑAS LEJANAS - Comienzan más abajo para simular horizonte
+        this.createMountainLayer('mountains_far', height * 0.58, 0.45, 0.85, 0.9);
         
-        // 5. NUBES MEDIAS
-        this.createCloudLayer(250, 350, 3, 0.35);
+        // 5. MONTAÑAS MEDIAS - Con tinte más visible
+        //this.createMountainLayer('mountains_mid', height * 0.52, 0.18, 1, 0.9);
         
         // 6. COLINAS OSCURAS - Base de las montañas
-        this.createMountainLayer('hills_dark', height * 0.68, 0.25, 0.9, 1.5);
+        this.createMountainLayer('hills_dark', height * 0.62, 0.28, 1, 1.2);
         
         // 7. BOSQUE LEJANO - Capa verde oscura
-        this.createForestLayer('forest_line', height * 0.76, 0.35, 0.7);
+        this.createForestLayer('forest_line', height * 0.68, 0.35, 0.7);
         
         // 8. BOSQUE CERCANO - Más verde y grande
-        this.createForestLayer('forest_line', height * 0.82, 0.5, 1);
+        this.createForestLayer('forest_line', height * 0.73, 0.5, 1);
         
         // 9. CÉSPED/HIERBA - Verde brillante
-        const grass = this.add.rectangle(0, height * 0.82, width, height * 0.05, 0x4a7c59);
+        const grass = this.add.rectangle(0, height * 0.76, width, height * 0.05, 0x4a7c59);
         grass.setOrigin(0, 0);
         grass.setScrollFactor(0.6, 1);
         
         // 10. TIERRA SUPERIOR - Café claro con textura
-        this.createTexturedGround(height * 0.87, 0.08, 0x8B6F47, 0.7);
+        this.createTexturedGround(height * 0.81, 0.12, 0x8B6F47, 0.7);
         
         // 11. TIERRA MEDIA - Café medio
-        const midSoil = this.add.rectangle(0, height * 0.95, width, height * 0.05, 0x6B4423);
+        const midSoil = this.add.rectangle(0, height * 0.93, width, height * 0.07, 0x6B4423);
         midSoil.setOrigin(0, 0);
         midSoil.setScrollFactor(0.8, 1);
         
@@ -61,35 +62,47 @@ class BackgroundScene extends Phaser.Scene {
     }
 
     createDetailedSky(width, height) {
-        // Cielo base
+        // Cielo con gradiente completo de arriba a abajo
         const sky = this.add.graphics();
-        sky.fillGradientStyle(0x87CEEB, 0x87CEEB, 0x5A9FD4, 0x4682B4, 1);
-        sky.fillRect(0, 0, width, height * 0.7);
-        
-        // Transición a horizonte
-        const horizon = this.add.graphics();
-        horizon.fillGradientStyle(0x5A9FD4, 0x5A9FD4, 0x87CEEB, 0x87CEEB, 1);
-        horizon.fillRect(0, height * 0.4, width, height * 0.3);
+        sky.fillGradientStyle(0x5ec4ff, 0x5ec4ff, 0x87CEEB, 0x4682B4, 1);
+        sky.fillRect(0, 0, width, height);
+        sky.setDepth(-100); // Asegurar que esté detrás de todo
     }
 
     createMountainLayer(textureKey, yPos, scrollFactor, alpha, scaleMultiplier) {
-        const { width } = this.cameras.main;
+        const { width, height } = this.cameras.main;
         
         try {
-            // Crear 3 copias para cubrir el ancho
-            for (let i = -0.5; i <= 1.5; i++) {
-                const sprite = this.add.image(width * i, yPos, textureKey);
-                sprite.setOrigin(0.5, 1);
+            // Calcular escala para que las montañas ocupen más espacio
+            const tempSprite = this.add.image(0, 0, textureKey);
+            
+            // Aumentar ambas escalas para que las montañas ocupen más espacio
+            const horizontalScale = scaleMultiplier * 2.5; // Estirar horizontalmente
+            
+            // Calcular escala vertical basada en la posición Y
+            // Mientras más abajo esté yPos, más grande debe ser la escala vertical
+            const verticalMultiplier = 1.8 + ((yPos / height) * 1.5); // Se ajusta dinámicamente
+            const verticalScale = scaleMultiplier * verticalMultiplier;
+            
+            const naturalWidth = tempSprite.width * horizontalScale;
+            const copiesNeeded = Math.ceil((width * 2) / naturalWidth) + 2;
+            tempSprite.destroy();
+            
+            // Crear copias suficientes para cubrir el ancho
+            for (let i = -1; i < copiesNeeded; i++) {
+                const sprite = this.add.image(0, yPos, textureKey);
+                sprite.setOrigin(0, 1); // Origen en la base, para que crezca hacia arriba
                 sprite.setScrollFactor(scrollFactor, 1);
                 sprite.setAlpha(alpha);
+                sprite.setScale(horizontalScale, verticalScale); // Escala más grande en ambos ejes
                 
-                const scale = (width / sprite.width) * scaleMultiplier;
-                sprite.setScale(scale);
+                sprite.x = naturalWidth * i;
                 
                 this.layers.push({
                     sprite: sprite,
                     scrollFactor: scrollFactor,
-                    baseX: width * i,
+                    baseX: naturalWidth * i,
+                    spriteWidth: naturalWidth,
                     isMountain: true
                 });
             }
@@ -102,24 +115,72 @@ class BackgroundScene extends Phaser.Scene {
         const { width } = this.cameras.main;
         
         try {
-            for (let i = -1; i <= 2; i++) {
-                const forest = this.add.image(width * i, yPos, textureKey);
+            // Calcular tamaño natural con escala moderada
+            const tempSprite = this.add.image(0, 0, textureKey);
+            const scale = 0.8; // Escala fija más conservadora
+            const naturalWidth = tempSprite.width * scale;
+            const copiesNeeded = Math.ceil((width * 2) / naturalWidth) + 2;
+            tempSprite.destroy();
+            
+            for (let i = -1; i < copiesNeeded; i++) {
+                const forest = this.add.image(0, yPos, textureKey);
                 forest.setOrigin(0, 1);
                 forest.setScrollFactor(scrollFactor, 1);
                 forest.setAlpha(alpha);
-                
-                const scale = (width / forest.width) * 1.1;
                 forest.setScale(scale);
+                
+                forest.x = naturalWidth * i;
                 
                 this.layers.push({
                     sprite: forest,
                     scrollFactor: scrollFactor,
-                    baseX: width * i,
+                    baseX: naturalWidth * i,
+                    spriteWidth: naturalWidth,
                     isTiled: true
                 });
             }
         } catch (error) {
             console.warn('⚠️ Error: bosque');
+        }
+    }
+
+    createGroundLayer(textureKey, yPos, scrollFactor) {
+        const { width, height } = this.cameras.main;
+        
+        try {
+            // Calcular cuántas copias de la imagen necesitamos para cubrir el ancho
+            const tempSprite = this.add.image(0, 0, textureKey);
+            const scale = 2.0; // Escala más grande para cubrir más área
+            const naturalWidth = tempSprite.width * scale;
+            const naturalHeight = tempSprite.height * scale;
+            const copiesNeeded = Math.ceil((width * 2) / naturalWidth) + 2;
+            tempSprite.destroy();
+            
+            for (let i = -1; i < copiesNeeded; i++) {
+                const ground = this.add.image(0, yPos, textureKey);
+                ground.setOrigin(0, 0); // Origen en la esquina superior izquierda
+                ground.setScrollFactor(scrollFactor, 1);
+                ground.setScale(scale);
+                ground.setDepth(10); // Asegurar que esté visible
+                
+                ground.x = naturalWidth * i;
+                
+                this.layers.push({
+                    sprite: ground,
+                    scrollFactor: scrollFactor,
+                    baseX: naturalWidth * i,
+                    spriteWidth: naturalWidth,
+                    isTiled: true
+                });
+            }
+            
+            console.log('✅ Suelo creado correctamente');
+        } catch (error) {
+            console.warn('⚠️ Error al cargar suelo, usando color sólido como respaldo');
+            // Si falla, crear un rectángulo café como respaldo
+            const fallbackGround = this.add.rectangle(0, yPos, width * 3, height * 0.2, 0x8B6F47);
+            fallbackGround.setOrigin(0, 0);
+            fallbackGround.setScrollFactor(scrollFactor, 1);
         }
     }
 
@@ -163,15 +224,15 @@ class BackgroundScene extends Phaser.Scene {
                 
                 cloud.setOrigin(0.5, 0.5);
                 cloud.setAlpha(alpha);
-                cloud.setScrollFactor(0.03 + (i * 0.02), 1);
+                cloud.setScrollFactor(0.05 + (i * 0.01), 1);
                 
-                const scale = Phaser.Math.FloatBetween(0.5, 1);
+                const scale = Phaser.Math.FloatBetween(0.8, 1.3);
                 cloud.setScale(scale);
                 
                 this.tweens.add({
                     targets: cloud,
-                    x: cloud.x + Phaser.Math.Between(100, 200),
-                    duration: 40000 + (i * 10000),
+                    x: cloud.x + Phaser.Math.Between(50, 150),
+                    duration: 50000 + (i * 10000),
                     repeat: -1,
                     yoyo: true,
                     ease: 'Sine.easeInOut'
@@ -184,22 +245,20 @@ class BackgroundScene extends Phaser.Scene {
 
     update(time, delta) {
         const camera = this.cameras.main;
-        const { width } = this.cameras.main;
         
         this.layers.forEach(layer => {
             if (layer.sprite && layer.sprite.active) {
                 const offsetX = camera.scrollX * layer.scrollFactor;
                 
-                if (layer.isTiled) {
+                if (layer.isTiled || layer.isMountain) {
                     let newX = layer.baseX - offsetX;
-                    const spriteWidth = layer.sprite.displayWidth;
+                    const spriteWidth = layer.spriteWidth;
                     
-                    while (newX < -spriteWidth * 2) newX += spriteWidth * 4;
-                    while (newX > spriteWidth * 2) newX -= spriteWidth * 4;
+                    // Wrap infinito para tiling
+                    while (newX < -spriteWidth * 2) newX += spriteWidth * 5;
+                    while (newX > spriteWidth * 3) newX -= spriteWidth * 5;
                     
                     layer.sprite.x = newX;
-                } else if (layer.isMountain) {
-                    layer.sprite.x = layer.baseX - offsetX;
                 }
             }
         });
