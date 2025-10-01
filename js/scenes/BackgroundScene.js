@@ -14,6 +14,7 @@ class BackgroundScene extends Phaser.Scene {
         this.load.image('forest_line', 'assets/backgrounds/forest_line.png');
         this.load.image('clouds', 'assets/backgrounds/clouds.png');
         this.load.image('ground_soil', 'assets/backgrounds/ground_soil.png'); // Nueva imagen de suelo
+        this.load.image('casita', 'assets/backgrounds/Casita-granja.png');
     }
 
     create() {
@@ -44,6 +45,11 @@ class BackgroundScene extends Phaser.Scene {
         
         // 8. BOSQUE CERCANO - Más verde y grande
         this.createForestLayer('forest_line', height * 0.73, 0.5, 1);
+        this.createForestLayer('forest_line', height * 0.82, 0.5, 1);
+
+        //8.1 Casita granja
+        // Pinta la casita a la izquierda, en el suelo
+        this.createHouse(700, 460, "casita", 0.5, 1, 1);
         
         // 9. CÉSPED/HIERBA - Verde brillante
         const grass = this.add.rectangle(0, height * 0.76, width, height * 0.05, 0x4a7c59);
@@ -60,6 +66,40 @@ class BackgroundScene extends Phaser.Scene {
         
         console.log('✅ BackgroundScene completada');
     }
+    
+    createHouse(x, y, textureKey, scale = 1, scrollFactor = 1, alpha = 1) {
+    try {
+        // Agregar sprite de la casita
+        const house = this.add.image(x, y, textureKey);
+        
+        // Ajustar origen (ej: desde la base)
+        house.setOrigin(0.5, 1);
+
+        // Escala personalizada
+        house.setScale(scale);
+
+        // Factor de desplazamiento (parallax)
+        house.setScrollFactor(scrollFactor);
+
+        // Transparencia
+        house.setAlpha(alpha);
+
+        // Guardar referencia si usas this.layers
+        this.layers.push({
+            sprite: house,
+            scrollFactor: scrollFactor,
+            baseX: x,
+            baseY: y,
+            isTiled: false
+        });
+
+        return house;
+    } catch (error) {
+        console.warn("⚠️ Error: no se pudo crear la casita", error);
+    }
+}
+
+    
 
     createDetailedSky(width, height) {
         // Cielo con gradiente completo de arriba a abajo
