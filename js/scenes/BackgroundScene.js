@@ -113,16 +113,12 @@ class BackgroundScene extends Phaser.Scene {
         const { width, height } = this.cameras.main;
         
         try {
-            // Calcular escala para que las montañas ocupen más espacio
+            // Usar escala original sin modificaciones
             const tempSprite = this.add.image(0, 0, textureKey);
             
-            // Aumentar ambas escalas para que las montañas ocupen más espacio
-            const horizontalScale = scaleMultiplier * 2.5; // Estirar horizontalmente
-            
-            // Calcular escala vertical basada en la posición Y
-            // Mientras más abajo esté yPos, más grande debe ser la escala vertical
-            const verticalMultiplier = 1.8 + ((yPos / height) * 1.5); // Se ajusta dinámicamente
-            const verticalScale = scaleMultiplier * verticalMultiplier;
+            // Escala 1:1 - tamaño original de las imágenes
+            const horizontalScale = scaleMultiplier;
+            const verticalScale = scaleMultiplier;
             
             const naturalWidth = tempSprite.width * horizontalScale;
             const copiesNeeded = Math.ceil((width * 2) / naturalWidth) + 2;
@@ -134,7 +130,7 @@ class BackgroundScene extends Phaser.Scene {
                 sprite.setOrigin(0, 1); // Origen en la base, para que crezca hacia arriba
                 sprite.setScrollFactor(scrollFactor, 1);
                 sprite.setAlpha(alpha);
-                sprite.setScale(horizontalScale, verticalScale); // Escala más grande en ambos ejes
+                sprite.setScale(horizontalScale, verticalScale);
                 
                 sprite.x = naturalWidth * i;
                 
@@ -155,9 +151,9 @@ class BackgroundScene extends Phaser.Scene {
         const { width } = this.cameras.main;
         
         try {
-            // Calcular tamaño natural con escala moderada
+            // Usar escala original 1:1
             const tempSprite = this.add.image(0, 0, textureKey);
-            const scale = 0.8; // Escala fija más conservadora
+            const scale = 1.0; // Escala original sin modificaciones
             const naturalWidth = tempSprite.width * scale;
             const copiesNeeded = Math.ceil((width * 2) / naturalWidth) + 2;
             tempSprite.destroy();
@@ -190,7 +186,7 @@ class BackgroundScene extends Phaser.Scene {
         try {
             // Calcular cuántas copias de la imagen necesitamos para cubrir el ancho
             const tempSprite = this.add.image(0, 0, textureKey);
-            const scale = 2.0; // Escala más grande para cubrir más área
+            const scale = 1.0; // Escala original 1:1
             const naturalWidth = tempSprite.width * scale;
             const naturalHeight = tempSprite.height * scale;
             const copiesNeeded = Math.ceil((width * 2) / naturalWidth) + 2;
