@@ -21,8 +21,10 @@ class GameScene extends Phaser.Scene {
     create() {
         console.log('🎮 GameScene creada');
         
-        // Crear fondo
-        this.createBackground();
+        // IMPORTANTE: Hacer el fondo de la cámara transparente para ver BackgroundScene
+        this.cameras.main.setBackgroundColor('rgba(0, 0, 0, 0)');
+        
+        // NO crear fondo aquí - se maneja en BackgroundScene
         
         // Crear jugador
         this.player = new Player(this, 100, 250);
@@ -38,19 +40,6 @@ class GameScene extends Phaser.Scene {
         
         // Almacenar referencias globalmente para fácil acceso
         window.gameScene = this;
-    }
-
-    createBackground() {
-        // Crear un fondo simple con gradiente de cielo
-        const graphics = this.add.graphics();
-        
-        // Cielo
-        graphics.fillGradientStyle(0x87CEEB, 0x87CEEB, 0xE0F6FF, 0xE0F6FF, 1);
-        graphics.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height * 0.7);
-        
-        // Tierra
-        graphics.fillStyle(0x8B4513);
-        graphics.fillRect(0, this.cameras.main.height * 0.7, this.cameras.main.width, this.cameras.main.height * 0.3);
     }
 
     setupInteractions() {

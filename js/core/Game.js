@@ -9,7 +9,7 @@ class Game {
         this.farm = null;
         this.hud = null;
         this.currentScene = null;
-        this.backgroundScene = null; // Nueva referencia a la escena de fondo
+        this.backgroundScene = null; // Referencia a la escena de fondo separada
         
         this.config = {
             type: Phaser.AUTO,
@@ -17,8 +17,8 @@ class Game {
             height: 500,
             backgroundColor: '#87CEEB',
             parent: 'phaser-game',
-            // Cambio principal: ahora tenemos múltiples escenas
-            scene: [BackgroundScene, GameScene], // BackgroundScene primero para que esté detrás
+            // Múltiples escenas: BackgroundScene para el fondo, GameScene para la lógica
+            scene: [BackgroundScene, GameScene], // BackgroundScene primero
             physics: {
                 default: 'arcade',
                 arcade: {
