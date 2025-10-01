@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * GameScene.js - Escena principal del juego
  */
@@ -220,3 +221,5 @@ class GameScene extends Phaser.Scene {
         super.destroy();
     }
 }
+=======
+>>>>>>> d18cc5b (Mis cambios locales)
