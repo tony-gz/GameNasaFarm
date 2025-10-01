@@ -28,7 +28,16 @@ class GameScene extends Phaser.Scene {
       key: "caminar",
       // Especifica manualmente el orden de los frames: Fila 1: 0, 1; Fila 2: 2, 3.
       frames: this.anims.generateFrameNumbers("player", {
-        frames: [1,2,3],
+        frames: [1, 2, 3],
+      }),
+      frameRate: 5,
+      repeat: -1,
+    });
+    this.anims.create({
+      key: "parado",
+      // Especifica manualmente el orden de los frames: Fila 1: 0, 1; Fila 2: 2, 3.
+      frames: this.anims.generateFrameNumbers("player", {
+        frames: [0],
       }),
       frameRate: 5,
       repeat: -1,
@@ -39,13 +48,13 @@ class GameScene extends Phaser.Scene {
     // Crear fondo
     this.createBackground();
 
-    // Crear jugador
-    this.player = new Player(this, 100, 250);
-    this.player.sprite.play('caminar', true);
-
     // Crear granja
     this.farm = new Farm(this, 5, 3);
 
+    // Crear jugador
+    this.player = new Player(this, 100, 250);
+    //this.player.sprite.play('caminar', true);
+    
     // Configurar interacciones
     this.setupInteractions();
 
@@ -111,7 +120,7 @@ class GameScene extends Phaser.Scene {
       this.handleFarmAction(result);
     } else {
       // Mover jugador hacia el clic si no es en la granja
-      this.movePlayerTowards(pointer.x, pointer.y);
+      //this.movePlayerTowards(pointer.x, pointer.y);
     }
   }
 
@@ -198,6 +207,18 @@ class GameScene extends Phaser.Scene {
 
     if (Phaser.Input.Keyboard.JustDown(this.keys.SPACE)) {
       this.nextDay();
+    }
+
+    if (this.cursors.left.isDown) {
+      this.player.sprite.play("caminar", true);
+      this.player.toLeft();
+      this.player.sprite.flipX = true;
+    } else if (this.cursors.right.isDown) {
+      this.player.sprite.play("caminar", true);
+      this.player.toRight();
+      this.player.sprite.flipX = false;
+    } else {
+      this.player.sprite.play("parado", true);
     }
   }
 
