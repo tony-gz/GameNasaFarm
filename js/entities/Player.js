@@ -1,5 +1,5 @@
 /**
- * Player.js - Clase del jugador MODIFICADA
+ * Player.js - Clase del jugador CORREGIDA
  */
 
 class Player {
@@ -11,9 +11,15 @@ class Player {
   }
 
   init() {
-    this.sprite = this.scene.add.sprite(this.x, this.y, "player", 0); // 🔥 CAMBIADO: Frame 0 (parado)
-    this.sprite.setOrigin(0.5, 0.5);
+    this.sprite = this.scene.add.sprite(this.x, this.y, "player", 0);
+    this.sprite.setOrigin(0.5, 1); // Origen en la base para mejor posicionamiento
     this.sprite.setScale(0.2);
+    
+    // Iniciar con animación de parado
+    if (this.scene.anims.exists('parado')) {
+      this.sprite.play('parado', true);
+    }
+    
     console.log("🧑‍🌾 Jugador creado en:", this.x, this.y);
   }
 
@@ -41,14 +47,14 @@ class Player {
     const position = this.getPosition();
     let newX;
     if (position.x <= 25) {
-      newX = 20;
+      newX = 25;
     } else {
       newX = position.x - 2;
     }
     this.move(newX, position.y);
   }
 
-  // 🔥 NUEVO: Métodos de movimiento con herramientas
+  // Métodos de movimiento con herramientas
   moveRight(tool) {
     let animation;
     
@@ -64,7 +70,11 @@ class Player {
         animation = 'caminar';
     }
     
-    this.sprite.play(animation, true);
+    // Solo reproducir la animación si no está ya reproduciéndose
+    if (this.sprite.anims.currentAnim?.key !== animation || !this.sprite.anims.isPlaying) {
+      this.sprite.play(animation, true);
+    }
+    
     this.toRight();
     this.sprite.setFlipX(false);
   }
@@ -84,7 +94,11 @@ class Player {
         animation = 'caminar';
     }
     
-    this.sprite.play(animation, true);
+    // Solo reproducir la animación si no está ya reproduciéndose
+    if (this.sprite.anims.currentAnim?.key !== animation || !this.sprite.anims.isPlaying) {
+      this.sprite.play(animation, true);
+    }
+    
     this.toLeft();
     this.sprite.setFlipX(true);
   }
@@ -92,19 +106,19 @@ class Player {
   stay(tool) {
     let animation = 'parado';
     
-    // Si tiene herramienta, usar animación de caminar con herramienta
-    // (esto mantiene la herramienta visible mientras está parado)
+    // Si tiene herramienta, usar animación de parado con herramienta
     if (tool === 'bucket') {
       animation = 'parado-balde';
     } else if (tool === 'shovel') {
       animation = 'parado-pala';
     }
     
-    this.sprite.play(animation, true);
-    console.log(`🛑 Jugador en modo stay con herramienta: ${tool}`);
+    if (this.scene.anims.exists(animation)) {
+      this.sprite.play(animation, true);
+    }
+    
+    console.log(`🛑 Jugador parado con herramienta: ${tool}`);
   }
-
-  // ... (el resto de tus métodos se mantienen igual)
 
   // Métodos de economía que ahora usan GameState
   canAfford(cost) {
