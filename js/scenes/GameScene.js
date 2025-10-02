@@ -31,7 +31,7 @@ class GameScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor('rgba(0, 0, 0, 0)');
         
         // Crear jugador
-        this.player = new Player(this, 40, 435);
+        this.player = new Player(this, 40, 437);
         
         // Granja desactivada temporalmente
         this.farm = null;

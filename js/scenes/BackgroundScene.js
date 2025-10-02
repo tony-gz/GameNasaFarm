@@ -15,7 +15,10 @@ class BackgroundScene extends Phaser.Scene {
         this.load.image('clouds', 'assets/backgrounds/clouds.png');
         this.load.image('ground_soil', 'assets/backgrounds/ground_soil.png'); // Imagen de suelo con textura
         this.load.image('casita', 'assets/backgrounds/Casita-granja.png');
-        this.load.image('ground_grass', 'assets/backgrounds/GrassTiles.png')
+        this.load.image('ground_grass', 'assets/backgrounds/GrassTiles.png');
+        this.load.image('tree_round', 'assets/backgrounds/Tree.png'); // Árbol redondo
+        this.load.image('tree_tall', 'assets/backgrounds/Tree_tall.png'); // Árbol alto
+        this.load.image('grassTiles_ground', 'assets/backgrounds/GrassTiles_ground.png')
     }
 
     create() {
@@ -33,29 +36,33 @@ class BackgroundScene extends Phaser.Scene {
         //this.createMountainLayer('mountains_mid', height * 0.35, 0.05, 1, 0.5);
         
         // 4. MONTAÑAS LEJANAS - Comienzan más abajo para simular horizonte
-        this.createMountainLayer('mountains_far', height * 0.78, 0.45, 0.85, 0.9);
+        this.createMountainLayer('mountains_far', height * 0.84, 0.45, 0.85, 0.9);
         
         // 5. MONTAÑAS MEDIAS - Con tinte más visible
         //this.createMountainLayer('mountains_mid', height * 0.52, 0.18, 1, 0.9);
         
         // 6. COLINAS OSCURAS - Base de las montañas
-        this.createMountainLayer('hills_dark', height * 0.75, 0.28, 1, 1.2);
+        //this.createMountainLayer('hills_dark', height * 0.75, 0.28, 1, 1.2);
         
         // 7. BOSQUE LEJANO - Capa verde oscura
-        this.createForestLayer('forest_line', height * 0.89, 0.35, 0.7);
+        //this.createForestLayer('forest_line', height * 0.89, 0.35, 0.7);
         
         // 8. BOSQUE CERCANO - Más verde y grande
-        this.createForestLayer('forest_line', height * 0.96, 0.5, 1);
-        this.createForestLayer('forest_line', height * 0.98, 0.5, 1);
+        //this.createForestLayer('forest_line', height * 0.96, 0.5, 1);
+        //this.createForestLayer('forest_line', height * 0.98, 0.5, 1);
 
         //8.1 Casita granja
         // Pinta la casita a la izquierda, en el suelo
         this.createHouse(700, 460, "casita", 0.5, 1, 1);
+
+        // 8.2 Árboles de fondo - Uno de cada tipo
+        this.createTree(300, height * 0.84, "tree_round", 0.3, 0.4, 1); // Árbol redondo (más lejano)
+        this.createTree(500, height * 0.89, "tree_tall", 0.4, 0.5, 1);  // Árbol alto (más cercano)
         
         // 9. TIERRA CON TEXTURA - Directamente después del bosque, sin césped verde
-        this.createGroundLayer('ground_grass', height * 0.835, 0.7, 0.2);
-        this.createGroundLayer('ground_soil', height * 0.888, 0.7, 0.2);
-        this.createGroundLayer('ground_soil', height * 0.94, 0.7, 0.2);
+        this.createGroundLayer('grassTiles_ground', height * 0.835, 0.7, 0.2);
+        //this.createGroundLayer('ground_soil', height * 0.888, 0.7, 0.2);
+        //this.createGroundLayer('ground_soil', height * 0.94, 0.7, 0.2);
         
         console.log('✅ BackgroundScene completada');
     }
@@ -91,6 +98,41 @@ class BackgroundScene extends Phaser.Scene {
             console.warn("⚠️ Error: no se pudo crear la casita", error);
         }
     }
+
+    createTree(x, y, textureKey, scale = 1, scrollFactor = 0.5, alpha = 1) {
+    try {
+        // Agregar sprite del árbol
+        const tree = this.add.image(x, y, textureKey);
+        
+        // Ajustar origen desde la base
+        tree.setOrigin(0.5, 1);
+
+        // Escala personalizada
+        tree.setScale(scale);
+
+        // Factor de desplazamiento (parallax) - más lento = más lejano
+        tree.setScrollFactor(scrollFactor);
+
+        // Transparencia
+        tree.setAlpha(alpha);
+
+        // Depth para que esté detrás de otros elementos
+        tree.setDepth(5);
+
+        // Guardar referencia
+        this.layers.push({
+            sprite: tree,
+            scrollFactor: scrollFactor,
+            baseX: x,
+            baseY: y,
+            isTiled: false
+        });
+
+        return tree;
+    } catch (error) {
+        console.warn("⚠️ Error: no se pudo crear el árbol", error);
+    }
+}
 
     createDetailedSky(width, height) {
         // Cielo con gradiente completo de arriba a abajo
