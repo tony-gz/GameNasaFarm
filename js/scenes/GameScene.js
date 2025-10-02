@@ -1,3 +1,8 @@
+
+/**
+ * GameScene.js - Escena principal del juego
+ */
+
 class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });

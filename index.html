@@ -1,94 +1,128 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NASA Farm Navigator</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NASA Farm Navigator</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <div id="loading" class="screen">
-            <h1>🌱 NASA Farm Navigator</h1>
-            <p>Cargando...</p>
-            <div class="loading-bar">
-                <div class="loading-progress"></div>
-            </div>
-        </div>
-        
-        <div id="menu" class="screen hidden">
-            <h1>🌱 NASA Farm Navigator</h1>
-            <p class="subtitle">Simulador Agrícola con Datos Reales de la NASA</p>
-            <div class="menu-buttons">
-                <button id="play-btn" class="btn primary">🚀 Jugar</button>
-                <button id="tutorial-btn" class="btn secondary">📚 Tutorial</button>
-                <button id="about-btn" class="btn secondary">ℹ️ Acerca de</button>
-            </div>
-        </div>
+<div id="game-container">
+<!-- Pantalla de carga -->
+<div id="loading" class="screen">
+<h1>🌱 NASA Farm Navigator</h1>
+<p>Cargando...</p>
+<div class="loading-bar">
+<div class="loading-progress"></div>
+</div>
+</div>
 
-        <div id="game" class="screen hidden">
-            <div id="hud">
-                <div class="hud-section">
-                    <span>💰 Dinero: <span id="money">1000</span></span>
-                    <span>⚡ Energía: <span id="energy">100</span></span>
-                    <span>📅 Día: <span id="day">1</span></span>
-                </div>
-                <div class="hud-section weather">
-                    <span>🌡️ <span id="temperature">25°C</span></span>
-                    <span>🌧️ <span id="precipitation">2mm</span></span>
-                    <span>☀️ <span id="solar">18kW</span></span>
-                </div>
-            </div>
-            
-            <div id="phaser-game"></div>
-            
-            <div id="controls">
-                <button id="plant-btn" class="control-btn">🌱 Plantar</button>
-                <button id="water-btn" class="control-btn">💧 Regar</button>
-                <button id="harvest-btn" class="control-btn">🌾 Cosechar</button>
-                <button id="next-day-btn" class="control-btn primary">⏰ Siguiente Día</button>
-            </div>
-        </div>
+<!-- Menú principal -->
+<div id="menu" class="screen hidden">
+<h1>🌱 NASA Farm Navigator</h1>
+<p class="subtitle">Simulador Agrícola con Datos Reales de la NASA</p>
+<div class="menu-buttons">
+<button id="play-btn" class="btn primary">🚀 Jugar</button>
+<button id="tutorial-btn" class="btn secondary">📚 Tutorial</button>
+<button id="about-btn" class="btn secondary">ℹ️ Acerca de</button>
+</div>
+</div>
 
-        <div id="tutorial" class="screen hidden">
-            <h2>📚 Tutorial</h2>
-            <div class="tutorial-content">
-                <p>Bienvenido a NASA Farm Navigator. Aquí aprenderás a:</p>
-                <ul>
-                    <li>🌱 Plantar cultivos usando datos satelitales reales</li>
-                    <li>💧 Regar de forma eficiente según el clima</li>
-                    <li>🌾 Cosechar para maximizar la producción</li>
-                    <li>📊 Interpretar datos climáticos de la NASA</li>
-                </ul>
-            </div>
-            <button id="back-to-menu" class="btn secondary">← Volver al Menú</button>
-        </div>
-    </div>
+<!-- Pantalla de juego -->
+<div id="game" class="screen hidden">
+<!-- HUD Superior con IDs duales para compatibilidad -->
+<div id="hud">
+<div id="hud-stats">
+<div class="stat-item">
+<span>💰</span>
+<span id="money-display"><span id="money">1000</span></span>
+</div>
+<div class="stat-item">
+<span>⚡</span>
+<span id="energy-display"><span id="energy">100</span></span>
+</div>
+<div class="stat-item">
+<span>📅</span>
+Día: <span id="day-display"><span id="day">1</span></span>
+</div>
+<div class="stat-item">
+<span>🌡️</span>
+<span id="temp-display"><span id="temperature">25°C</span></span>
+</div>
+<div class="stat-item">
+<span>☁️</span>
+<span id="weather-display"><span id="precipitation">2mm</span></span>
+</div>
+<div class="stat-item">
+<span>☀️</span>
+<span id="solar-display"><span id="solar">18kW</span></span>
+</div>
+</div>
+</div>
 
-    <!-- Phaser.js CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.70.0/phaser.min.js"></script>
-    
-    <!-- Core Classes -->
-    <script src="js/core/GameState.js"></script>
-    <script src="js/core/Game.js"></script>
-    
-    <!-- Entities -->
-    <script src="js/entities/Player.js"></script>
-    <script src="js/entities/Crop.js"></script>
-    <script src="js/entities/Farm.js"></script>
-    
-    <!-- Scenes -->
-    <script src="js/scenes/MenuScene.js"></script>
-    <script src="js/scenes/GameScene.js"></script>
-    
-    <!-- UI -->
-    <script src="js/ui/HUD.js"></script>
-    
-    <!-- Utils -->
-    <script src="js/utils/helpers.js"></script>
-    <script src="js/utils/NasaAPI.js"></script>
-    
-    <!-- Main Script -->
-    <script src="script.js"></script>
+<!-- Canvas de Phaser -->
+<div id="phaser-game"></div>
+
+<!-- Controles inferiores -->
+<div id="game-controls">
+    <button id="btn-plant" class="game-button plant">
+        🌱 Plantar
+    </button>
+    <button id="btn-water" class="game-button water">
+        💧 Regar
+    </button>
+    <button id="btn-harvest" class="game-button harvest">
+        🌾 Cosechar
+    </button>
+    <button id="btn-next-day" class="game-button next-day">
+        ☀️ Siguiente Día
+    </button>
+</div>
+
+<!-- Tutorial -->
+<div id="tutorial" class="screen hidden">
+<h2>📚 Tutorial</h2>
+<div class="tutorial-content">
+<p>Bienvenido a NASA Farm Navigator. Aquí aprenderás a:</p>
+<ul>
+<li>🌱 Plantar cultivos usando datos satelitales reales</li>
+<li>💧 Regar de forma eficiente según el clima</li>
+<li>🌾 Cosechar para maximizar la producción</li>
+<li>📊 Interpretar datos climáticos de la NASA</li>
+</ul>
+</div>
+<button id="back-to-menu" class="btn secondary">← Volver al Menú</button>
+</div>
+</div>
+
+<!-- Notificaciones -->
+<div id="notification"></div>
+
+<!-- Phaser.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.70.0/phaser.min.js"></script>
+
+<!-- Core Classes -->
+<script src="js/core/GameState.js"></script>
+<script src="js/core/Game.js"></script>
+
+<!-- Entities -->
+<script src="js/entities/Player.js"></script>
+<script src="js/entities/Crop.js"></script>
+<script src="js/entities/Farm.js"></script>
+
+<!-- Scenes -->
+<script src="js/scenes/BackgroundScene.js"></script>
+<script src="js/scenes/MenuScene.js"></script>
+<script src="js/scenes/GameScene.js"></script>
+
+<!-- UI -->
+<script src="js/ui/HUD.js"></script>
+
+<!-- Utils -->
+<script src="js/utils/helpers.js"></script>
+<script src="js/utils/NasaAPI.js"></script>
+
+<!-- Main Script -->
+<script src="script.js"></script>
 </body>
 </html>

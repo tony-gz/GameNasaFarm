@@ -5,11 +5,25 @@
     box-sizing: border-box;
 }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    color: white;
+body, html {
+    width: 100%;
+    height: 100%;
     overflow: hidden;
+    background-color: #1a1a2e;
+}
+
+#phaser-game {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 /* ===== CONTENEDOR PRINCIPAL ===== */
@@ -130,14 +144,40 @@ body {
 }
 
 #hud {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    background: rgba(0,0,0,0.7);
-    padding: 10px 20px;
+    z-index: 1000;
+    pointer-events: none;
+}
+/* HUD mejorado - agregar después de la sección #hud existente */
+#hud-stats {
     display: flex;
-    justify-content: space-between;
+    gap: 30px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 15px 25px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    width: fit-content;
+    pointer-events: auto;
+}
+
+.stat-item {
+    display: flex;
     align-items: center;
-    font-size: 14px;
-    z-index: 100;
+    gap: 8px;
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.stat-item span {
+    font-size: 20px;
+}
+
+#hud > * {
+    pointer-events: auto;
 }
 
 .hud-section {
@@ -157,13 +197,6 @@ body {
     border-radius: 20px;
 }
 
-#phaser-game {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #87CEEB; /* Color cielo */
-}
 
 #controls {
     width: 100%;
@@ -174,22 +207,53 @@ body {
     gap: 15px;
     z-index: 100;
 }
-
-.control-btn {
-    padding: 12px 20px;
-    font-size: 1rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    background: rgba(255,255,255,0.1);
-    color: white;
-    border: 2px solid rgba(255,255,255,0.3);
+/* ESTILOS PARA BOTONES DEL JUEGO - FORZAR APLICACIÓN */
+#game-controls {
+    position: fixed !important;
+    bottom: 30px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    gap: 15px !important;
+    pointer-events: none !important;
 }
 
-.control-btn:hover {
-    background: rgba(255,255,255,0.2);
-    transform: translateY(-1px);
+.game-button {
+    pointer-events: auto !important;
+    border: none !important;
+    padding: 15px 30px !important;
+    border-radius: 12px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+}
+
+.game-button:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+.game-button.plant {
+    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%) !important;
+    color: #2c5f2d !important;
+}
+
+.game-button.water {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+    color: #003f5c !important;
+}
+
+.game-button.harvest {
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%) !important;
+    color: #2c1810 !important;
+}
+
+.game-button.next-day {
+    background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%) !important;
+    color: white !important;
 }
 
 .control-btn.primary {
