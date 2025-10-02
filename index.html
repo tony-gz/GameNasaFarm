@@ -30,33 +30,15 @@
 
 <!-- Pantalla de juego -->
 <div id="game" class="screen hidden">
-<!-- HUD Superior con IDs duales para compatibilidad -->
+<!-- HUD Superior -->
 <div id="hud">
 <div id="hud-stats">
-<div class="stat-item">
-<span>💰</span>
-<span id="money-display"><span id="money">1000</span></span>
-</div>
-<div class="stat-item">
-<span>⚡</span>
-<span id="energy-display"><span id="energy">100</span></span>
-</div>
-<div class="stat-item">
-<span>📅</span>
-Día: <span id="day-display"><span id="day">1</span></span>
-</div>
-<div class="stat-item">
-<span>🌡️</span>
-<span id="temp-display"><span id="temperature">25°C</span></span>
-</div>
-<div class="stat-item">
-<span>☁️</span>
-<span id="weather-display"><span id="precipitation">2mm</span></span>
-</div>
-<div class="stat-item">
-<span>☀️</span>
-<span id="solar-display"><span id="solar">18kW</span></span>
-</div>
+<div class="stat-item"><span>💰</span><span id="money">1000</span></div>
+<div class="stat-item"><span>⚡</span><span id="energy">100</span></div>
+<div class="stat-item"><span>📅</span>Día: <span id="day">1</span></div>
+<div class="stat-item"><span>🌡️</span><span id="temperature">25°C</span></div>
+<div class="stat-item"><span>☁️</span><span id="precipitation">2mm</span></div>
+<div class="stat-item"><span>☀️</span><span id="solar">18kW</span></div>
 </div>
 </div>
 
@@ -65,18 +47,11 @@ Día: <span id="day-display"><span id="day">1</span></span>
 
 <!-- Controles inferiores -->
 <div id="game-controls">
-    <button id="btn-plant" class="game-button plant">
-        🌱 Plantar
-    </button>
-    <button id="btn-water" class="game-button water">
-        💧 Regar
-    </button>
-    <button id="btn-harvest" class="game-button harvest">
-        🌾 Cosechar
-    </button>
-    <button id="btn-next-day" class="game-button next-day">
-        ☀️ Siguiente Día
-    </button>
+<button id="btn-plant" class="game-button plant">🌱 Plantar</button>
+<button id="btn-water" class="game-button water">💧 Regar</button>
+<button id="btn-harvest" class="game-button harvest">🌾 Cosechar</button>
+<button id="btn-next-day" class="game-button next-day">☀️ Siguiente Día</button>
+</div>
 </div>
 
 <!-- Tutorial -->
@@ -101,6 +76,13 @@ Día: <span id="day-display"><span id="day">1</span></span>
 <!-- Phaser.js CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.70.0/phaser.min.js"></script>
 
+<!-- Utils (primero, ya que otros dependen de ellos) -->
+<script src="js/utils/helpers.js"></script>
+<script src="js/utils/NasaAPI.js"></script>
+
+<!-- Visual Effects -->
+<script src="js/utils/VisualEffects.js"></script>
+
 <!-- Core Classes -->
 <script src="js/core/GameState.js"></script>
 <script src="js/core/Game.js"></script>
@@ -110,19 +92,19 @@ Día: <span id="day-display"><span id="day">1</span></span>
 <script src="js/entities/Crop.js"></script>
 <script src="js/entities/Farm.js"></script>
 
+<!-- UI -->
+<script src="js/ui/HUD.js"></script>
+
+<!-- Managers (nuevo) -->
+<script src="js/scenes/LoadingManager.js"></script>
+<script src="js/scenes/EventManager.js"></script>
+
 <!-- Scenes -->
 <script src="js/scenes/BackgroundScene.js"></script>
 <script src="js/scenes/MenuScene.js"></script>
 <script src="js/scenes/GameScene.js"></script>
 
-<!-- UI -->
-<script src="js/ui/HUD.js"></script>
-
-<!-- Utils -->
-<script src="js/utils/helpers.js"></script>
-<script src="js/utils/NasaAPI.js"></script>
-
-<!-- Main Script -->
+<!-- Main Script (último) -->
 <script src="script.js"></script>
 </body>
 </html>
