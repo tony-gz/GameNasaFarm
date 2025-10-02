@@ -31,7 +31,7 @@ class GameScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor('rgba(0, 0, 0, 0)');
         
         // Crear jugador
-        this.player = new Player(this, 30, 435);
+        this.player = new Player(this, 40, 435);
         
         // Granja desactivada temporalmente
         this.farm = null;
@@ -240,39 +240,11 @@ class GameScene extends Phaser.Scene {
     }
 
     handleKeyboardInput() {
-        // PRIMERO: Verificar teclas de herramientas (tienen prioridad)
-        // Teclas de herramientas (una sola vez)
-        if (Phaser.Input.Keyboard.JustDown(this.keys.P)) {
-            this.pickUpTool('shovel'); // Pala para plantar
-            return; // Salir para no procesar movimiento
-        }
-        
-        if (Phaser.Input.Keyboard.JustDown(this.keys.W)) {
-            this.pickUpTool('bucket'); // Cubeta para regar
-            return; // Salir para no procesar movimiento
-        }
-        
-        if (Phaser.Input.Keyboard.JustDown(this.keys.Q)) {
-            this.dropTool(); // Soltar herramienta
-            return; // Salir para no procesar movimiento
-        }
-        
-        if (Phaser.Input.Keyboard.JustDown(this.keys.H)) {
-            console.log('🌾 Modo cosechar activado (teclado)');
-            return;
-        }
-        
-        if (Phaser.Input.Keyboard.JustDown(this.keys.SPACE)) {
-            this.nextDay();
-            return;
-        }
-
-        // Si está recogiendo herramienta, no permitir NADA
+        // Si está recogiendo herramienta, no permitir movimiento
         if (this.isPickingUpTool) {
             return;
         }
 
-        // SEGUNDO: Procesar movimiento continuo
         // Movimiento con flechas (continuo)
         if (this.cursors.left.isDown) {
             this.player.moveLeft(this.currentTool);
@@ -281,6 +253,27 @@ class GameScene extends Phaser.Scene {
         } else {
             // Si no se presiona ninguna flecha, quedarse quieto
             this.player.stay(this.currentTool);
+        }
+        
+        // Teclas de herramientas (una sola vez)
+        if (Phaser.Input.Keyboard.JustDown(this.keys.P)) {
+            this.pickUpTool('shovel'); // Pala para plantar
+        }
+        
+        if (Phaser.Input.Keyboard.JustDown(this.keys.W)) {
+            this.pickUpTool('bucket'); // Cubeta para regar
+        }
+        
+        if (Phaser.Input.Keyboard.JustDown(this.keys.Q)) {
+            this.dropTool(); // Soltar herramienta
+        }
+        
+        if (Phaser.Input.Keyboard.JustDown(this.keys.H)) {
+            console.log('🌾 Modo cosechar activado (teclado)');
+        }
+        
+        if (Phaser.Input.Keyboard.JustDown(this.keys.SPACE)) {
+            this.nextDay();
         }
     }
 
@@ -307,18 +300,13 @@ class GameScene extends Phaser.Scene {
     executePickUpTool(tool) {
         this.isPickingUpTool = true;
         
-        // CRÍTICO: Detener cualquier animación en curso
-        this.player.sprite.stop();
-        
         // Reproducir animación de agarrar herramienta
         const pickupAnimation = tool === 'bucket' ? 'agarrar-balde' : 'agarrar-pala';
         
-        console.log(`🎬 Reproduciendo animación: ${pickupAnimation}`);
         this.player.sprite.play(pickupAnimation);
         
         // Cuando termine la animación, actualizar el estado
         this.player.sprite.once('animationcomplete', () => {
-            console.log(`✅ Animación ${pickupAnimation} completada`);
             this.currentTool = tool;
             this.isPickingUpTool = false;
             

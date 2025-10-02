@@ -104,15 +104,6 @@ class Player {
   }
 
   stay(tool) {
-    // CRÍTICO: NO interrumpir animaciones que no se repiten (como agarrar herramientas)
-    const currentAnim = this.sprite.anims.currentAnim;
-    
-    // Si hay una animación reproduciéndose y NO se repite (repeat === 0), NO la interrumpas
-    if (currentAnim && currentAnim.repeat === 0 && this.sprite.anims.isPlaying) {
-      console.log(`⏸️ No interrumpir animación: ${currentAnim.key}`);
-      return;
-    }
-    
     let animation = 'parado';
     
     // Si tiene herramienta, usar animación de parado con herramienta
