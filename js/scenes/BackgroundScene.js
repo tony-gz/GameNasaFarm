@@ -13,8 +13,9 @@ class BackgroundScene extends Phaser.Scene {
         this.load.image('hills_dark', 'assets/backgrounds/hills_dark.png');
         this.load.image('forest_line', 'assets/backgrounds/forest_line.png');
         this.load.image('clouds', 'assets/backgrounds/clouds.png');
-        this.load.image('ground_soil', 'assets/backgrounds/ground_soil.png'); // Nueva imagen de suelo
+        this.load.image('ground_soil', 'assets/backgrounds/ground_soil.png'); // Imagen de suelo con textura
         this.load.image('casita', 'assets/backgrounds/Casita-granja.png');
+        this.load.image('ground_grass', 'assets/backgrounds/GrassTiles.png')
     }
 
     create() {
@@ -51,55 +52,45 @@ class BackgroundScene extends Phaser.Scene {
         // Pinta la casita a la izquierda, en el suelo
         this.createHouse(700, 460, "casita", 0.5, 1, 1);
         
-        // 9. CÉSPED/HIERBA - Verde brillante
-        const grass = this.add.rectangle(0, height * 0.84, width, height * 0.05, 0x4a7c59);
-        grass.setOrigin(0, 0);
-        grass.setScrollFactor(0.6, 1);
-        
-        // 10. TIERRA SUPERIOR - Café claro con textura
-        this.createTexturedGround(height * 0.88, 0.12, 0x8B6F47, 0.7);
-        
-        // 11. TIERRA MEDIA - Café medio
-        const midSoil = this.add.rectangle(0, height * 0.96, width, height * 0.07, 0x6B4423);
-        midSoil.setOrigin(0, 0);
-        midSoil.setScrollFactor(0.8, 1);
+        // 9. TIERRA CON TEXTURA - Directamente después del bosque, sin césped verde
+        this.createGroundLayer('ground_grass', height * 0.835, 0.7, 0.2);
+        this.createGroundLayer('ground_soil', height * 0.888, 0.7, 0.2);
+        this.createGroundLayer('ground_soil', height * 0.94, 0.7, 0.2);
         
         console.log('✅ BackgroundScene completada');
     }
     
     createHouse(x, y, textureKey, scale = 1, scrollFactor = 1, alpha = 1) {
-    try {
-        // Agregar sprite de la casita
-        const house = this.add.image(x, y, textureKey);
-        
-        // Ajustar origen (ej: desde la base)
-        house.setOrigin(0.5, 1);
+        try {
+            // Agregar sprite de la casita
+            const house = this.add.image(x, y, textureKey);
+            
+            // Ajustar origen (ej: desde la base)
+            house.setOrigin(0.5, 1);
 
-        // Escala personalizada
-        house.setScale(scale);
+            // Escala personalizada
+            house.setScale(scale);
 
-        // Factor de desplazamiento (parallax)
-        house.setScrollFactor(scrollFactor);
+            // Factor de desplazamiento (parallax)
+            house.setScrollFactor(scrollFactor);
 
-        // Transparencia
-        house.setAlpha(alpha);
+            // Transparencia
+            house.setAlpha(alpha);
 
-        // Guardar referencia si usas this.layers
-        this.layers.push({
-            sprite: house,
-            scrollFactor: scrollFactor,
-            baseX: x,
-            baseY: y,
-            isTiled: false
-        });
+            // Guardar referencia si usas this.layers
+            this.layers.push({
+                sprite: house,
+                scrollFactor: scrollFactor,
+                baseX: x,
+                baseY: y,
+                isTiled: false
+            });
 
-        return house;
-    } catch (error) {
-        console.warn("⚠️ Error: no se pudo crear la casita", error);
+            return house;
+        } catch (error) {
+            console.warn("⚠️ Error: no se pudo crear la casita", error);
+        }
     }
-}
-
-    
 
     createDetailedSky(width, height) {
         // Cielo con gradiente completo de arriba a abajo
@@ -180,40 +171,42 @@ class BackgroundScene extends Phaser.Scene {
         }
     }
 
-    createGroundLayer(textureKey, yPos, scrollFactor) {
+    createGroundLayer(textureKey, yPos, scrollFactor, scale = 1.0) {
         const { width, height } = this.cameras.main;
         
         try {
-            // Calcular cuántas copias de la imagen necesitamos para cubrir el ancho
+            // Calcular el ancho real de cada sprite con la escala aplicada
             const tempSprite = this.add.image(0, 0, textureKey);
-            const scale = 1.0; // Escala original 1:1
-            const naturalWidth = tempSprite.width * scale;
-            const naturalHeight = tempSprite.height * scale;
-            const copiesNeeded = Math.ceil((width * 2) / naturalWidth) + 2;
+            const spriteWidth = tempSprite.width * scale;
             tempSprite.destroy();
             
-            for (let i = -1; i < copiesNeeded; i++) {
-                const ground = this.add.image(0, yPos, textureKey);
-                ground.setOrigin(0, 0); // Origen en la esquina superior izquierda
+            // Calcular cuántas copias necesitamos para cubrir toda la pantalla + márgenes para parallax
+            const totalCoverage = width * 8; // 8x el ancho de pantalla para más cobertura
+            const totalCopies = Math.ceil(totalCoverage / spriteWidth) + 30;
+            
+            console.log(`📏 Suelo: ancho por sprite=${spriteWidth}px, total copias=${totalCopies}`);
+            
+            // Crear sprites pegados uno al lado del otro, sin espacios
+            // Empezar desde -30 para cubrir mucho más a la izquierda
+            for (let i = -30; i < totalCopies; i++) {
+                const ground = this.add.image(i * spriteWidth, yPos, textureKey);
+                ground.setOrigin(0, 0);
                 ground.setScrollFactor(scrollFactor, 1);
                 ground.setScale(scale);
-                ground.setDepth(10); // Asegurar que esté visible
-                
-                ground.x = naturalWidth * i;
+                ground.setDepth(10);
                 
                 this.layers.push({
                     sprite: ground,
                     scrollFactor: scrollFactor,
-                    baseX: naturalWidth * i,
-                    spriteWidth: naturalWidth,
+                    baseX: i * spriteWidth,
+                    spriteWidth: spriteWidth,
                     isTiled: true
                 });
             }
             
-            console.log('✅ Suelo creado correctamente');
+            console.log('✅ Suelo creado: sprites pegados sin espacios');
         } catch (error) {
             console.warn('⚠️ Error al cargar suelo, usando color sólido como respaldo');
-            // Si falla, crear un rectángulo café como respaldo
             const fallbackGround = this.add.rectangle(0, yPos, width * 3, height * 0.2, 0x8B6F47);
             fallbackGround.setOrigin(0, 0);
             fallbackGround.setScrollFactor(scrollFactor, 1);
@@ -283,19 +276,26 @@ class BackgroundScene extends Phaser.Scene {
         const camera = this.cameras.main;
         
         this.layers.forEach(layer => {
-            if (layer.sprite && layer.sprite.active) {
+            if (layer.sprite && layer.sprite.active && layer.isTiled) {
                 const offsetX = camera.scrollX * layer.scrollFactor;
+                const spriteWidth = layer.spriteWidth;
                 
-                if (layer.isTiled || layer.isMountain) {
-                    let newX = layer.baseX - offsetX;
-                    const spriteWidth = layer.spriteWidth;
-                    
-                    // Wrap infinito para tiling
-                    while (newX < -spriteWidth * 2) newX += spriteWidth * 5;
-                    while (newX > spriteWidth * 3) newX -= spriteWidth * 5;
-                    
-                    layer.sprite.x = newX;
+                // Calcular nueva posición basada en el offset de la cámara
+                let newX = layer.baseX - offsetX;
+                
+                // Wrapping simplificado - cuando sale por un lado, aparece por el otro
+                const wrapRange = spriteWidth * 50; // Rango grande de wrapping
+                
+                while (newX < -wrapRange) {
+                    newX += spriteWidth;
+                    layer.baseX += spriteWidth;
                 }
+                while (newX > wrapRange) {
+                    newX -= spriteWidth;
+                    layer.baseX -= spriteWidth;
+                }
+                
+                layer.sprite.x = newX;
             }
         });
     }
