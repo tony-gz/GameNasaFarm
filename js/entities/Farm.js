@@ -36,6 +36,7 @@ class Farm {
                 const posY = this.gridStartY + y * this.cellSize;
                 
                 // Crear celda visual de la granja
+                /*
                 const cell = this.scene.add.rectangle(
                     posX, posY, 
                     this.cellSize - 5, this.cellSize - 5, 
@@ -45,6 +46,7 @@ class Farm {
                 
                 // Guardar referencia
                 this.gridGraphics.push(cell);
+                */
                 this.gridCells.push({
                     x: x,
                     y: y,

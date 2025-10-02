@@ -14,6 +14,7 @@ class HUD {
         };
         
         this.init();
+        this.setupButtons();
     }
 
     init() {
@@ -24,6 +25,47 @@ class HUD {
         this.updateAll();
         
         console.log('📊 HUD inicializado');
+    }
+
+    setupButtons() {
+        // Conectar botones con el sistema de herramientas
+        const btnPlant = document.getElementById('btn-plant');
+        const btnWater = document.getElementById('btn-water');
+        const btnHarvest = document.getElementById('btn-harvest');
+        const btnNextDay = document.getElementById('btn-next-day');
+        
+        if (btnPlant) {
+            btnPlant.addEventListener('click', () => {
+                console.log('🌱 Botón plantar presionado');
+                if (window.gameScene) {
+                    window.gameScene.pickUpTool('shovel');
+                }
+            });
+        }
+        
+        if (btnWater) {
+            btnWater.addEventListener('click', () => {
+                console.log('💧 Botón regar presionado');
+                if (window.gameScene) {
+                    window.gameScene.pickUpTool('bucket');
+                }
+            });
+        }
+        
+        if (btnHarvest) {
+            btnHarvest.addEventListener('click', () => {
+                console.log('🌾 Modo cosechar activado');
+                this.showNotification('🌾 Modo cosechar activado. Haz clic en un cultivo maduro', 'info');
+            });
+        }
+        
+        if (btnNextDay) {
+            btnNextDay.addEventListener('click', () => {
+                if (window.game) {
+                    window.game.nextDay();
+                }
+            });
+        }
     }
 
     handleStateChange(change) {
@@ -47,43 +89,57 @@ class HUD {
 
     updateMoney() {
         const money = gameState.getMoney();
-        this.elements.money.textContent = money;
-        
-        // Cambiar color basado en dinero disponible
-        if (money < 100) {
-            this.elements.money.style.color = '#ff4444';
-        } else if (money < 500) {
-            this.elements.money.style.color = '#ffaa00';
-        } else {
-            this.elements.money.style.color = '#ffffff';
+        if (this.elements.money) {
+            this.elements.money.textContent = money;
+            
+            // Cambiar color basado en dinero disponible
+            if (money < 100) {
+                this.elements.money.style.color = '#ff4444';
+            } else if (money < 500) {
+                this.elements.money.style.color = '#ffaa00';
+            } else {
+                this.elements.money.style.color = '#ffffff';
+            }
         }
     }
 
     updateEnergy() {
         const energy = gameState.getEnergy();
-        this.elements.energy.textContent = energy;
-        
-        // Cambiar color basado en energía
-        if (energy < 20) {
-            this.elements.energy.style.color = '#ff4444';
-        } else if (energy < 50) {
-            this.elements.energy.style.color = '#ffaa00';
-        } else {
-            this.elements.energy.style.color = '#ffffff';
+        if (this.elements.energy) {
+            this.elements.energy.textContent = energy;
+            
+            // Cambiar color basado en energía
+            if (energy < 20) {
+                this.elements.energy.style.color = '#ff4444';
+            } else if (energy < 50) {
+                this.elements.energy.style.color = '#ffaa00';
+            } else {
+                this.elements.energy.style.color = '#ffffff';
+            }
         }
     }
 
     updateDay() {
         const day = gameState.getDay();
-        this.elements.day.textContent = day;
+        if (this.elements.day) {
+            this.elements.day.textContent = day;
+        }
     }
 
     updateWeather() {
         const weather = gameState.getWeather();
         
-        this.elements.temperature.textContent = Math.round(weather.temperature) + '°C';
-        this.elements.precipitation.textContent = Math.round(weather.precipitation * 10) / 10 + 'mm';
-        this.elements.solar.textContent = Math.round(weather.solar * 10) / 10 + 'kW';
+        if (this.elements.temperature) {
+            this.elements.temperature.textContent = Math.round(weather.temperature) + '°C';
+        }
+        
+        if (this.elements.precipitation) {
+            this.elements.precipitation.textContent = Math.round(weather.precipitation * 10) / 10 + 'mm';
+        }
+        
+        if (this.elements.solar) {
+            this.elements.solar.textContent = Math.round(weather.solar * 10) / 10 + 'kW';
+        }
         
         // Aplicar colores según condiciones
         this.updateWeatherColors(weather);
@@ -91,28 +147,34 @@ class HUD {
 
     updateWeatherColors(weather) {
         // Temperatura
-        if (weather.temperature < 10) {
-            this.elements.temperature.style.color = '#87ceeb'; // Azul frío
-        } else if (weather.temperature > 30) {
-            this.elements.temperature.style.color = '#ff6b47'; // Rojo caliente
-        } else {
-            this.elements.temperature.style.color = '#ffffff';
+        if (this.elements.temperature) {
+            if (weather.temperature < 10) {
+                this.elements.temperature.style.color = '#87ceeb'; // Azul frío
+            } else if (weather.temperature > 30) {
+                this.elements.temperature.style.color = '#ff6b47'; // Rojo caliente
+            } else {
+                this.elements.temperature.style.color = '#ffffff';
+            }
         }
 
         // Precipitación
-        if (weather.precipitation > 5) {
-            this.elements.precipitation.style.color = '#87ceeb'; // Azul lluvia
-        } else {
-            this.elements.precipitation.style.color = '#ffffff';
+        if (this.elements.precipitation) {
+            if (weather.precipitation > 5) {
+                this.elements.precipitation.style.color = '#87ceeb'; // Azul lluvia
+            } else {
+                this.elements.precipitation.style.color = '#ffffff';
+            }
         }
 
         // Energía solar
-        if (weather.solar > 20) {
-            this.elements.solar.style.color = '#ffd700'; // Amarillo sol fuerte
-        } else if (weather.solar < 10) {
-            this.elements.solar.style.color = '#999999'; // Gris sol débil
-        } else {
-            this.elements.solar.style.color = '#ffffff';
+        if (this.elements.solar) {
+            if (weather.solar > 20) {
+                this.elements.solar.style.color = '#ffd700'; // Amarillo sol fuerte
+            } else if (weather.solar < 10) {
+                this.elements.solar.style.color = '#999999'; // Gris sol débil
+            } else {
+                this.elements.solar.style.color = '#ffffff';
+            }
         }
     }
 
@@ -175,48 +237,24 @@ class HUD {
         });
     }
 
-    // Métodos para mostrar notificaciones
+    // Sistema de notificaciones mejorado
     showNotification(message, type = 'info', duration = 3000) {
-        const notification = document.createElement('div');
-        notification.className = `hud-notification hud-notification-${type}`;
+        let notification = document.getElementById('notification');
+        
+        // Si no existe, crear elemento de notificación
+        if (!notification) {
+            notification = document.createElement('div');
+            notification.id = 'notification';
+            document.body.appendChild(notification);
+        }
+        
+        // Configurar notificación
         notification.textContent = message;
+        notification.className = `show ${type}`;
         
-        notification.style.cssText = `
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 6px;
-            color: white;
-            font-weight: bold;
-            z-index: 1001;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-        `;
-
-        // Colores según tipo
-        const colors = {
-            info: '#2196F3',
-            success: '#4CAF50',
-            warning: '#FF9800',
-            error: '#f44336'
-        };
-        
-        notification.style.backgroundColor = colors[type] || colors.info;
-        
-        document.body.appendChild(notification);
-
-        // Animar entrada
+        // Remover clases después de la duración
         setTimeout(() => {
-            notification.style.transform = 'translateX(0)';
-        }, 10);
-
-        // Animar salida y remover
-        setTimeout(() => {
-            notification.style.transform = 'translateX(100%)';
-            setTimeout(() => {
-                notification.remove();
-            }, 300);
+            notification.className = '';
         }, duration);
     }
 
@@ -234,7 +272,7 @@ class HUD {
     }
 
     showInsufficientEnergy() {
-        this.showNotification('⚡ No tienes suficiente energía', 'warning');
+        this.showNotification('⚡ No tienes suficiente energía', 'error');
     }
 
     showCropNotReady() {
