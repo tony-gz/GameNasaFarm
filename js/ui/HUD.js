@@ -28,7 +28,7 @@ class HUD {
     }
 
     setupButtons() {
-        // Conectar botones con los nuevos IDs
+        // Conectar botones con el sistema de herramientas
         const btnPlant = document.getElementById('btn-plant');
         const btnWater = document.getElementById('btn-water');
         const btnHarvest = document.getElementById('btn-harvest');
@@ -36,15 +36,18 @@ class HUD {
         
         if (btnPlant) {
             btnPlant.addEventListener('click', () => {
-                console.log('🌱 Modo plantar activado');
-                this.showNotification('🌱 Modo plantar activado. Haz clic en una celda vacía', 'info');
+                console.log('🌱 Botón plantar presionado');
+                if (window.gameScene) {
+                    window.gameScene.pickUpTool('shovel');
+                }
             });
         }
         
         if (btnWater) {
             btnWater.addEventListener('click', () => {
-                if (window.game) {
-                    window.game.waterCrops();
+                console.log('💧 Botón regar presionado');
+                if (window.gameScene) {
+                    window.gameScene.pickUpTool('bucket');
                 }
             });
         }
