@@ -26,41 +26,41 @@ class BackgroundScene extends Phaser.Scene {
         this.createDetailedSky(width, height);
         
         // 2. NUBES - Una sola capa desde el borde superior
-        this.createCloudLayer(0, 100, 5, 0.3);
+        this.createCloudLayer(0, 100, 5, 0.7);
         
         // 3. MONTAÑAS MUY LEJANAS - Color original sin modificar
         //this.createMountainLayer('mountains_mid', height * 0.35, 0.05, 1, 0.5);
         
         // 4. MONTAÑAS LEJANAS - Comienzan más abajo para simular horizonte
-        this.createMountainLayer('mountains_far', height * 0.58, 0.45, 0.85, 0.9);
+        this.createMountainLayer('mountains_far', height * 0.78, 0.45, 0.85, 0.9);
         
         // 5. MONTAÑAS MEDIAS - Con tinte más visible
         //this.createMountainLayer('mountains_mid', height * 0.52, 0.18, 1, 0.9);
         
         // 6. COLINAS OSCURAS - Base de las montañas
-        this.createMountainLayer('hills_dark', height * 0.62, 0.28, 1, 1.2);
+        this.createMountainLayer('hills_dark', height * 0.75, 0.28, 1, 1.2);
         
         // 7. BOSQUE LEJANO - Capa verde oscura
-        this.createForestLayer('forest_line', height * 0.68, 0.35, 0.7);
+        this.createForestLayer('forest_line', height * 0.89, 0.35, 0.7);
         
         // 8. BOSQUE CERCANO - Más verde y grande
-        this.createForestLayer('forest_line', height * 0.73, 0.5, 1);
-        this.createForestLayer('forest_line', height * 0.82, 0.5, 1);
+        this.createForestLayer('forest_line', height * 0.96, 0.5, 1);
+        this.createForestLayer('forest_line', height * 0.98, 0.5, 1);
 
         //8.1 Casita granja
         // Pinta la casita a la izquierda, en el suelo
         this.createHouse(700, 460, "casita", 0.5, 1, 1);
         
         // 9. CÉSPED/HIERBA - Verde brillante
-        const grass = this.add.rectangle(0, height * 0.76, width, height * 0.05, 0x4a7c59);
+        const grass = this.add.rectangle(0, height * 0.84, width, height * 0.05, 0x4a7c59);
         grass.setOrigin(0, 0);
         grass.setScrollFactor(0.6, 1);
         
         // 10. TIERRA SUPERIOR - Café claro con textura
-        this.createTexturedGround(height * 0.81, 0.12, 0x8B6F47, 0.7);
+        this.createTexturedGround(height * 0.88, 0.12, 0x8B6F47, 0.7);
         
         // 11. TIERRA MEDIA - Café medio
-        const midSoil = this.add.rectangle(0, height * 0.93, width, height * 0.07, 0x6B4423);
+        const midSoil = this.add.rectangle(0, height * 0.96, width, height * 0.07, 0x6B4423);
         midSoil.setOrigin(0, 0);
         midSoil.setScrollFactor(0.8, 1);
         
