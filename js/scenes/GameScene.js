@@ -13,7 +13,25 @@ class GameScene extends Phaser.Scene {
 
     preload() {
         console.log('🎮 Cargando GameScene...');
+        this.load.image('corn_semilla', 'assets/data/images/crops/corn_semilla.png');
+        this.load.image('corn_germinacion', 'assets/data/images/crops/corn_germinacion.png');
+        this.load.image('corn_floracion', 'assets/data/images/crops/corn_floracion.png');
+        this.load.image('corn_maduracion', 'assets/data/images/crops/corn_maduracion.png');
+        this.load.image('corn_marchitacion', 'assets/data/images/crops/corn_marchitacion.png'); 
+
+        this.load.image('tomato_semilla', 'assets/data/images/crops/tomato_semilla.png');
+        this.load.image('tomato_germinacion', 'assets/data/images/crops/tomato_germinacion.png');
+        this.load.image('tomato_floracion', 'assets/data/images/crops/tomato_floracion.png');  
+        this.load.image('tomato_maduracion', 'assets/data/images/crops/tomato_maduracion.png');
+        this.load.image('tomato_marchitacion', 'assets/data/images/crops/tomato_marchitacion.png');
         
+        this.load.image('wheat_semilla', 'assets/data/images/crops/wheat_semilla.png');
+        this.load.image('wheat_germinacion', 'assets/data/images/crops/wheat_germinacion.png');
+        this.load.image('wheat_floracion', 'assets/data/images/crops/wheat_floracion.png');  
+        this.load.image('wheat_maduracion', 'assets/data/images/crops/wheat_maduracion.png');
+        this.load.image('wheat_marchitacion', 'assets/data/images/crops/wheat_marchitacion.png');   
+
+
         // Cargar spritesheet del jugador
         this.load.spritesheet('player', 'assets/sheet2.png', {
             frameWidth: 444,

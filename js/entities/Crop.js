@@ -42,7 +42,13 @@ class Crop {
                 maturityDays: 5,
                 optimalTemp: { min: 20, max: 30 },
                 waterNeed: { min: 30, max: 80 },
-            
+                stages: {
+                    seed: 'tomato_semilla',
+                    germination: 'tomato_germinacion',
+                    flowering: 'tomato_floracion',
+                    maturation: 'tomato_maduracion',
+                    withered: 'tomato_marchitacion'
+                }
             },
             corn: {
                 growthRate: 1.5,
@@ -50,7 +56,14 @@ class Crop {
                 harvestValue: 60,
                 maturityDays: 7,
                 optimalTemp: { min: 15, max: 35 },
-                waterNeed: { min: 40, max: 90 }
+                waterNeed: { min: 40, max: 90 },
+                 stages: {
+                    seed: 'corn_semilla',
+                    germination: 'corn_germinacion',
+                    flowering: 'corn_floracion',
+                    maturation: 'corn_maduracion',
+                    withered: 'corn_marchitacion'
+                }
             },
             wheat: {
                 growthRate: 1,
@@ -58,7 +71,14 @@ class Crop {
                 harvestValue: 40,
                 maturityDays: 10,
                 optimalTemp: { min: 10, max: 25 },
-                waterNeed: { min: 20, max: 70 }
+                waterNeed: { min: 20, max: 70 },
+                 stages: {
+                    seed: 'wheat_semilla',
+                    germination: 'wheat_germinacion',
+                    flowering: 'wheat_floracion',
+                    maturation: 'wheat_maduracion',
+                    withered: 'wheat_marchitacion'
+                }
             }
         };
 
@@ -176,31 +196,55 @@ class Crop {
         return this.waterLevel - oldLevel;
     }
 
-    updateVisual() {
-        if (!this.sprite) return;
 
-        // Cambiar color basado en crecimiento y salud
-        let color;
-        if (this.growth < 25) {
-            color = 0x8BC34A; // Verde claro (semilla)
-        } else if (this.growth < 50) {
-            color = 0x4CAF50; // Verde (creciendo)
-        } else if (this.growth < 75) {
-            color = 0x2E7D32; // Verde oscuro (casi maduro)
+    getCurrentStage() {
+        if (this.isWithered) { // Prioridad: si está marchito, mostrar imagen de marchito
+            return 'withered';
+        } else if (this.growth < 20) { // Menos del 20% de crecimiento
+            return 'seed'; // Semilla
+        } else if (this.growth < 40) { // 20% a 39%
+            return 'germination'; // Germinación
+        } else if (this.growth < 65) { // 40% a 64%
+            return 'flowering'; // Floración
+        } else { // 65% o más
+            return 'maturation'; // Maduración
+        }
+    }
+
+    // En Crop.js, reemplaza tu updateVisual() existente con esto:
+
+    updateVisual() {
+        if (!this.sprite) return; // Asegurarse de que el sprite exista
+
+        // 1. Determinar la clave de la textura según la etapa actual
+        let textureKey = this.cropData.stages[this.getCurrentStage()];
+        
+        // 2. Establecer la textura del sprite
+        // Phaser cambiará automáticamente la imagen del sprite
+        this.sprite.setTexture(textureKey);
+
+        // 3. Opcional: Ajustar la escala del sprite para simular crecimiento
+        // Esto le da un efecto visual de "crecer" incluso con imágenes
+        if (!this.isWithered) {
+            // Escala el sprite de 0.8 a 1.2, por ejemplo, a medida que crece
+            const scale = 0.8 + (this.growth / 100) * 0.4;
+            this.sprite.setScale(scale);
         } else {
-            color = 0xFF6B35; // Naranja (maduro)
+            // Si está marchito, puedes mantener una escala fija o más pequeña
+            this.sprite.setScale(0.8);
         }
-        
-        // Modificar color si falta agua
-        if (this.waterLevel < 20) {
-            color = 0x8D6E63; // Marrón (necesita agua)
+
+        // 4. Opcional: Aplicar un tinte (tint) al sprite basado en el estado (ej. falta de agua, baja salud)
+        // Esto añade una capa visual sobre la imagen para indicar problemas.
+        if (this.isWithered) {
+            this.sprite.setTint(0x604030); // Tono marrón oscuro para marchito
+        } else if (this.waterLevel < 20) {
+            this.sprite.setTint(0x8D6E63); // Tono marrón claro para falta severa de agua
+        } else if (this.health < 50) {
+            this.sprite.setTint(0xAAAAAA); // Tono grisáceo para salud baja
+        } else {
+            this.sprite.setTint(0xFFFFFF); // Color normal (sin tinte)
         }
-        
-        this.sprite.setFillStyle(color);
-        
-        // Cambiar tamaño basado en crecimiento
-        const size = 8 + (this.growth / 100) * 12;
-        this.sprite.setRadius(size);
     }
 
     canHarvest() {
