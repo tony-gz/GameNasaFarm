@@ -34,9 +34,22 @@ class Farm {
             for (let y = 0; y < this.height; y++) {
                 const posX = this.gridStartX + x * this.cellSize;
                 const posY = this.gridStartY + y * this.cellSize;
-
+                
+                // Crear celda visual de la granja
+                /*
+                const cell = this.scene.add.rectangle(
+                    posX, posY, 
+                    this.cellSize - 5, this.cellSize - 5, 
+                    0x8B4513
+                );
+                cell.setStrokeStyle(2, 0x654321);
+                
+                // Guardar referencia
+                this.gridGraphics.push(cell);
+                */
                 this.gridCells.push({
-                    x, y,
+                    x: x,
+                    y: y,
                     worldX: posX,
                     worldY: posY,
                     occupied: false
@@ -47,25 +60,33 @@ class Farm {
 
     handleClick(x, y) {
         const gridPos = this.getGridPosition(x, y);
-        if (!gridPos) return null;
+        
+        if (!gridPos) {
+            return null;
+        }
 
         const index = this.getIndex(gridPos.x, gridPos.y);
         const crop = this.crops[index];
         
         if (crop === null) {
+            // Celda vacía - intentar plantar
             return this.attemptPlant(gridPos.x, gridPos.y);
         } else {
+            // Hay cultivo - intentar cosechar
             return this.attemptHarvest(gridPos.x, gridPos.y);
         }
     }
 
     getGridPosition(worldX, worldY) {
+        // Convertir coordenadas del mundo a posición en grid
         const gridX = Math.floor((worldX - this.gridStartX + this.cellSize/2) / this.cellSize);
         const gridY = Math.floor((worldY - this.gridStartY + this.cellSize/2) / this.cellSize);
         
+        // Verificar que esté dentro de los límites
         if (gridX >= 0 && gridX < this.width && gridY >= 0 && gridY < this.height) {
             return { x: gridX, y: gridY };
         }
+        
         return null;
     }
 
@@ -82,74 +103,90 @@ class Farm {
 
     attemptPlant(gridX, gridY, cropType = 'tomato') {
         const index = this.getIndex(gridX, gridY);
+        
+        // Verificar que la celda esté vacía
         if (this.crops[index] !== null) {
             console.log('🚫 Ya hay un cultivo plantado aquí');
             return null;
         }
 
-        // Verificar energía/dinero del jugador
-        if (!gameState.useEnergy(5)) {
-            console.log("⚡ No tienes energía para plantar");
-            return null;
-        }
-        if (!gameState.spendMoney(20)) {
-            console.log("💰 No tienes dinero suficiente para plantar");
+        // Usar el sistema del jugador para verificar recursos
+        if (!game.player.plantCrop(cropType)) {
             return null;
         }
 
+        // Plantar el cultivo
         const worldPos = this.getWorldPosition(gridX, gridY);
         this.crops[index] = new Crop(this.scene, cropType, worldPos.x, worldPos.y);
+        
+        // Actualizar celda
         this.gridCells[index].occupied = true;
         
         console.log(`🌱 ${cropType} plantado en (${gridX}, ${gridY})`);
-        return { action: 'plant', cropType, gridX, gridY, success: true };
+        
+        return {
+            action: 'plant',
+            cropType: cropType,
+            gridX: gridX,
+            gridY: gridY,
+            success: true
+        };
     }
 
     attemptHarvest(gridX, gridY) {
         const index = this.getIndex(gridX, gridY);
         const crop = this.crops[index];
         
-        if (!crop) return null;
+        if (!crop) {
+            console.log('🚫 No hay cultivo para cosechar');
+            return null;
+        }
+
         if (!crop.canHarvest()) {
             console.log('🌿 El cultivo aún no está listo');
             return { action: 'harvest', success: false, reason: 'not_ready' };
         }
 
-        if (!gameState.useEnergy(5)) {
+        // Intentar cosechar
+        const harvestData = crop.harvest();
+        if (!harvestData) {
+            return { action: 'harvest', success: false, reason: 'failed' };
+        }
+
+        // Verificar si el jugador tiene energía
+        if (!game.player.harvestCrop(harvestData.value)) {
             return { action: 'harvest', success: false, reason: 'no_energy' };
         }
 
-        const harvestData = crop.harvest();
-        if (!harvestData) return { action: 'harvest', success: false, reason: 'failed' };
-
-        // Dar recompensa
-        gameState.addMoney(harvestData.value);
-
+        // Remover cultivo de la granja
         this.crops[index] = null;
         this.gridCells[index].occupied = false;
         crop.destroy();
 
-        console.log(`🌾 Cosechado ${harvestData.type} → +${harvestData.value} monedas`);
-        return { action: 'harvest', success: true, harvest: harvestData, gridX, gridY };
+        console.log(`🌾 Cosechado ${harvestData.type} por ${harvestData.value} monedas`);
+
+        return {
+            action: 'harvest',
+            success: true,
+            harvest: harvestData,
+            gridX: gridX,
+            gridY: gridY
+        };
     }
 
     waterCrop(gridX, gridY) {
         const index = this.getIndex(gridX, gridY);
         const crop = this.crops[index];
-        if (!crop) return false;
-
-        if (!gameState.useEnergy(2)) {
-            console.log("⚡ Sin energía para regar");
+        
+        if (!crop) {
             return false;
         }
 
-        crop.water();
-        return true;
+        return crop.water();
     }
 
     waterAllCrops() {
-        if (!gameState.useEnergy(10)) {
-            console.log("⚡ No hay energía suficiente para regar todo");
+        if (!game.player.waterCrops()) {
             return false;
         }
 
@@ -166,30 +203,82 @@ class Farm {
     }
 
     updateCrops(weatherData) {
-        this.crops.forEach(crop => {
-            if (crop) crop.grow(weatherData);
+        this.crops.forEach((crop, index) => {
+            if (crop) {
+                crop.grow(weatherData);
+            }
         });
     }
 
-    // Información rápida
+    // Métodos de información
+    getCropCount() {
+        return this.crops.filter(crop => crop !== null).length;
+    }
+
+    getEmptySpaces() {
+        return this.crops.filter(crop => crop === null).length;
+    }
+
+    getReadyToHarvest() {
+        return this.crops.filter(crop => crop && crop.canHarvest()).length;
+    }
+
+    getCropsNeedingWater() {
+        return this.crops.filter(crop => crop && crop.waterLevel < 30).length;
+    }
+
     getFarmStatus() {
         const total = this.width * this.height;
-        const occupied = this.crops.filter(c => c !== null).length;
-        const ready = this.crops.filter(c => c && c.canHarvest()).length;
-        const needWater = this.crops.filter(c => c && c.waterLevel < 30).length;
+        const occupied = this.getCropCount();
+        const readyToHarvest = this.getReadyToHarvest();
+        const needWater = this.getCropsNeedingWater();
 
         return {
             totalSpaces: total,
             occupiedSpaces: occupied,
             emptySpaces: total - occupied,
-            readyToHarvest: ready,
+            readyToHarvest: readyToHarvest,
             needingWater: needWater
         };
     }
 
+    // Métodos de utilidad
+    isValidPosition(gridX, gridY) {
+        return gridX >= 0 && gridX < this.width && gridY >= 0 && gridY < this.height;
+    }
+
+    isEmpty(gridX, gridY) {
+        if (!this.isValidPosition(gridX, gridY)) {
+            return false;
+        }
+        const index = this.getIndex(gridX, gridY);
+        return this.crops[index] === null;
+    }
+
+    getCropAt(gridX, gridY) {
+        if (!this.isValidPosition(gridX, gridY)) {
+            return null;
+        }
+        const index = this.getIndex(gridX, gridY);
+        return this.crops[index];
+    }
+
+    // Cleanup
     destroy() {
-        this.crops.forEach(crop => crop?.destroy());
-        this.gridGraphics.forEach(g => g?.destroy());
+        // Destruir todos los cultivos
+        this.crops.forEach(crop => {
+            if (crop) {
+                crop.destroy();
+            }
+        });
+
+        // Destruir elementos gráficos del grid
+        this.gridGraphics.forEach(graphic => {
+            if (graphic) {
+                graphic.destroy();
+            }
+        });
+
         this.crops = [];
         this.gridGraphics = [];
         this.gridCells = [];
