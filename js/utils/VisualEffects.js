@@ -206,26 +206,6 @@ class VisualEffects {
     }
 }
 
-
-    
-   
-
-
-/**
- * TimeUtils - Utilidades de tiempo
- */
-class TimeUtils {
-    static delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    
-    static formatTime(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    }
-}
-
 /**
  * DebugUtils - Utilidades de depuración
  */
