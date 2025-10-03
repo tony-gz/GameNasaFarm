@@ -149,6 +149,9 @@ class GameActions {
 
         try {
             const newWeather = await nasaAPI.getNextDayWeather();
+            if (window.hud && newWeather.source) {
+                window.hud.updateDataSource(newWeather.source);
+            }
             gameState.updateWeather(newWeather);
             gameState.nextDay();
 
