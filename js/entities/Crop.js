@@ -41,7 +41,8 @@ class Crop {
                 harvestValue: 80,
                 maturityDays: 5,
                 optimalTemp: { min: 20, max: 30 },
-                waterNeed: { min: 30, max: 80 }
+                waterNeed: { min: 30, max: 80 },
+            
             },
             corn: {
                 growthRate: 1.5,
