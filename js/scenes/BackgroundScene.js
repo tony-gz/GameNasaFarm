@@ -33,7 +33,7 @@ class BackgroundScene extends Phaser.Scene {
 
         //8.1 Casita granja
         // Pinta la casita a la izquierda, en el suelo
-        this.createHouse(700, 460, "casita", 0.5, 1, 1);
+        this.createHouse(700, 480, "casita", 0.3, 1, 1);
 
         // 8.2 Árboles de fondo - Uno de cada tipo
         this.createTree(150, height * 0.88, "tree_round", 0.17, 0.4, 1); // Árbol redondo (más lejano)
