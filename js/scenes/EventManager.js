@@ -99,27 +99,39 @@ class NavigationManager {
  */
 class GameActions {
     static activatePlantMode() {
-        console.log('🌱 Modo plantar activado');
-        SoundUtils.playPlant();
-        
-        if (window.hud) {
-            window.hud.showNotification('🌱 Haz clic en una celda vacía para plantar', 'info', 3000);
+        console.log('Activando modo plantar...');
+
+        // Verificar que gameScene existe
+        if (!window.gameScene) {
+            console.error('GameScene no disponible');
+            return;
         }
+
+        // NUEVO: Verificar proximidad
+        if (!window.gameScene.isPlayerNearCropField()) {
+            if (window.hud) {
+                window.hud.showNotification('Acércate al campo de cultivo', 'error');
+            }
+            return;
+        }
+
+        // Si está cerca, mostrar menú de selección
+        window.gameScene.showCropSelectionMenu();
     }
     
     static waterAllCrops() {
-        console.log('💧 Regando todos los cultivos...');
-        
-        if (window.game) {
-            const success = window.game.waterCrops();
-            SoundUtils.playWater();
-            
-            if (!success && window.hud) {
-                window.hud.showInsufficientEnergy();
-            }
+        console.log('LLAMANDO waterAllCrops de GameActions');
+        console.log('Regando cultivos...');
+
+        if (!window.gameScene) {
+            console.error('GameScene no disponible');
+            return;
         }
+
+        // La validación de proximidad ya está dentro de waterAllCrops()
+        window.gameScene.waterAllCrops();
     }
-    
+
     static activateHarvestMode() {
         console.log('🌾 Modo cosechar activado');
         
@@ -129,41 +141,36 @@ class GameActions {
     }
     
     static async nextDay() {
-        console.log('🌅 Avanzando al siguiente día...');
-        
-        if (!window.game) {
-            console.error('❌ Juego no inicializado');
+        console.log('Avanzando al siguiente día...');
+
+        if (!window.gameScene) {
+            console.error('GameScene no disponible');
             return;
         }
-        
+
         try {
             const newWeather = await nasaAPI.getNextDayWeather();
             gameState.updateWeather(newWeather);
             gameState.nextDay();
-            
-            if (window.game.getCurrentScene()) {
-                window.game.getCurrentScene().farm.updateCrops(newWeather);
-            }
-            
-            SoundUtils.playNextDay();
-            
-            const weatherDesc = WeatherUtils.getWeatherDescription(newWeather);
+
+            // Actualizar cultivos
+            window.gameScene.updateAllCrops(newWeather);
+
+            // Mostrar clima
+            const weatherDesc = `Temp: ${newWeather.temperature}°C, Lluvia: ${newWeather.precipitation}mm, Solar: ${newWeather.solar}kW`;
             if (window.hud) {
-                window.hud.showNotification(`🌅 Día ${gameState.getDay()}: ${weatherDesc}`, 'info', 4000);
+                window.hud.showNotification(`Día ${gameState.getDay()}: ${weatherDesc}`, 'info', 4000);
             }
-            
-            if (Math.random() < 0.3) {
-                setTimeout(() => TutorialUtils.showTip(), 1500);
-            }
-            
+
+            console.log('Día actualizado con clima NASA');
+
         } catch (error) {
-            console.error('❌ Error avanzando día:', error);
+            console.error('Error avanzando día:', error);
             gameState.nextDay();
-            if (window.game.getCurrentScene()) {
-                window.game.getCurrentScene().farm.updateCrops(gameState.getWeather());
-            }
         }
     }
+
+
 }
 
 /**

@@ -1,0 +1,11 @@
+{
+  "days": [
+    { "temperature": 25, "precipitation": 2, "solar": 18 },
+    { "temperature": 28, "precipitation": 0, "solar": 22 },
+    { "temperature": 23, "precipitation": 5, "solar": 15 },
+    { "temperature": 26, "precipitation": 1, "solar": 20 },
+    { "temperature": 30, "precipitation": 0, "solar": 24 },
+    { "temperature": 22, "precipitation": 8, "solar": 12 },
+    { "temperature": 24, "precipitation": 3, "solar": 17 }
+  ]
+}
