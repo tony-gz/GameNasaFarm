@@ -9,54 +9,54 @@ class EventManager {
         this.setupKeyboard();
         this.setupWindow();
     }
-    
+
     static setupMenuButtons() {
         document.getElementById('play-btn')?.addEventListener('click', () => {
             NavigationManager.startGame();
         });
-        
+
         document.getElementById('tutorial-btn')?.addEventListener('click', () => {
             NavigationManager.showTutorial();
         });
-        
+
         document.getElementById('about-btn')?.addEventListener('click', () => {
             NavigationManager.showAbout();
         });
-        
+
         document.getElementById('back-to-menu')?.addEventListener('click', () => {
             NavigationManager.backToMenu();
         });
     }
-    
+
     static setupGameButtons() {
         document.getElementById('btn-plant')?.addEventListener('click', () => {
             GameActions.activatePlantMode();
         });
-        
+
         document.getElementById('btn-water')?.addEventListener('click', () => {
             GameActions.waterAllCrops();
         });
-        
+
         document.getElementById('btn-harvest')?.addEventListener('click', () => {
             GameActions.activateHarvestMode();
         });
-        
+
         document.getElementById('btn-next-day')?.addEventListener('click', () => {
             GameActions.nextDay();
         });
     }
-    
+
     static setupKeyboard() {
         document.addEventListener('keydown', (event) => {
             KeyboardHandler.handle(event);
         });
     }
-    
+
     static setupWindow() {
         window.addEventListener('beforeunload', () => {
             GameSaveManager.save();
         });
-        
+
         window.addEventListener('resize', () => {
             WindowHandler.handleResize();
         });
@@ -70,23 +70,23 @@ class NavigationManager {
     static startGame() {
         console.log('🎮 Iniciando juego...');
         ScreenManager.show('game');
-        
+
         setTimeout(() => {
             GameInitializer.init();
         }, 100);
     }
-    
+
     static showTutorial() {
         ScreenManager.show('tutorial');
     }
-    
+
     static showAbout() {
         alert('🌱 NASA Farm Navigator\n\nSimulador agrícola que utiliza datos reales de la NASA para crear una experiencia educativa sobre agricultura y clima.\n\nDesarrollado con Phaser.js y NASA POWER API.');
     }
-    
+
     static backToMenu() {
         ScreenManager.show('menu');
-        
+
         if (window.game) {
             window.game.destroy();
             window.game = null;
@@ -108,7 +108,7 @@ class GameActions {
         }
 
         // NUEVO: Verificar proximidad
-        if (!window.gameScene.isPlayerNearCropField()) {
+        if (!window.gameScene.isPlayerNearAnyField()) {
             if (window.hud) {
                 window.hud.showNotification('Acércate al campo de cultivo', 'error');
             }
@@ -118,9 +118,8 @@ class GameActions {
         // Si está cerca, mostrar menú de selección
         window.gameScene.showCropSelectionMenu();
     }
-    
+
     static waterAllCrops() {
-        console.log('LLAMANDO waterAllCrops de GameActions');
         console.log('Regando cultivos...');
 
         if (!window.gameScene) {
@@ -128,18 +127,18 @@ class GameActions {
             return;
         }
 
-        // La validación de proximidad ya está dentro de waterAllCrops()
+        // ⭐ QUITAR la validación isPlayerNearAnyField de aquí
+        // La validación individual está en GameScene.waterAllCrops()
         window.gameScene.waterAllCrops();
     }
-
     static activateHarvestMode() {
         console.log('🌾 Modo cosechar activado');
-        
+
         if (window.hud) {
             window.hud.showNotification('🌾 Haz clic en cultivos maduros (naranjas) para cosechar', 'info', 3000);
         }
     }
-    
+
     static async nextDay() {
         console.log('Avanzando al siguiente día...');
 
@@ -184,13 +183,13 @@ class KeyboardHandler {
                 event.preventDefault();
                 NavigationManager.showTutorial();
                 break;
-                
+
             case 'Escape':
                 if (ScreenManager.getCurrent() === 'game') {
                     NavigationManager.backToMenu();
                 }
                 break;
-                
+
             case 'KeyD':
                 if (event.ctrlKey) {
                     event.preventDefault();
@@ -198,35 +197,35 @@ class KeyboardHandler {
                 }
                 break;
         }
-        
+
         // Teclas específicas del juego
         if (ScreenManager.getCurrent() === 'game') {
             this.handleGameKeys(event);
         }
     }
-    
+
     static handleGameKeys(event) {
         switch (event.code) {
             case 'Space':
                 event.preventDefault();
                 GameActions.nextDay();
                 break;
-                
+
             case 'KeyW':
                 event.preventDefault();
                 GameActions.waterAllCrops();
                 break;
-                
+
             case 'KeyP':
                 event.preventDefault();
                 GameActions.activatePlantMode();
                 break;
-                
+
             case 'KeyH':
                 event.preventDefault();
                 GameActions.activateHarvestMode();
                 break;
-                
+
             case 'KeyR':
                 if (event.ctrlKey) {
                     event.preventDefault();
@@ -259,7 +258,7 @@ class GameSaveManager {
             console.log('💾 Progreso guardado');
         }
     }
-    
+
     static load() {
         const saveData = StorageUtils.load('nasa_farm_save');
         if (saveData) {
@@ -294,13 +293,13 @@ class GameInitializer {
         try {
             window.game = new Game();
             window.hud = window.game.getHUD();
-            
+
             setTimeout(() => {
                 TutorialUtils.showTip();
             }, 2000);
-            
+
             console.log('✅ Juego inicializado correctamente');
-            
+
         } catch (error) {
             console.error('❌ Error inicializando juego:', error);
             ErrorHandler.handleInitError();
@@ -319,7 +318,7 @@ class ErrorHandler {
             }
         }
     }
-    
+
     static handleInitError() {
         alert('Error al inicializar el juego. Por favor, recarga la página.');
         NavigationManager.backToMenu();
@@ -335,7 +334,7 @@ class BrowserUtils {
         if (!window.localStorage) {
             console.warn('⚠️ LocalStorage no disponible');
         }
-        
+
         if (!window.WebGLRenderingContext) {
             console.warn('⚠️ WebGL no disponible');
         }

@@ -27,6 +27,21 @@ class GameScene extends Phaser.Scene {
         this.load.image('corn_stage2', 'assets/images/crops/corn_stage2.png');
         this.load.image('corn_mature', 'assets/images/crops/corn_mature.png');
         this.load.image('corn_dead', 'assets/images/crops/corn_dead.png');
+
+        // Cargar sprites de cultivos de tomate
+        this.load.image('tomato_seed', 'assets/images/crops/tomato_seed.png');
+        this.load.image('tomato_stage1', 'assets/images/crops/tomato_stage1.png');
+        this.load.image('tomato_stage2', 'assets/images/crops/tomato_stage2.png');
+        this.load.image('tomato_mature', 'assets/images/crops/tomato_mature.png');
+        this.load.image('tomato_dead', 'assets/images/crops/tomato_dead.png');
+
+        // Cargar sprites de cultivos de trigo
+        this.load.image('wheat_seed', 'assets/images/crops/wheat_seed.png');
+        this.load.image('wheat_stage1', 'assets/images/crops/wheat_stage1.png');
+        this.load.image('wheat_stage2', 'assets/images/crops/wheat_stage2.png');
+        this.load.image('wheat_stage3', 'assets/images/crops/wheat_stage3.png');
+        this.load.image('wheat_mature', 'assets/images/crops/wheat_mature.png');
+        this.load.image('wheat_dead', 'assets/images/crops/wheat_dead.png');
     }
 
     create() {
@@ -42,12 +57,29 @@ class GameScene extends Phaser.Scene {
         this.player = new Player(this, 40, 437);
 
         // Definir el área del campo de cultivo
-        this.cropField = {
-            x: 400,              // Centro horizontal de tu canvas (ajusta según tu ancho)
-            y: 450,              // Posición vertical del campo
-            width: 300,          // Ancho del área de cultivo
-            height: 150,         // Alto del área de cultivo
-            proximityRange: 100  // Distancia máxima para interactuar (en píxeles)
+        // Reemplaza tu cropField actual por:
+        this.cropFields = {
+            corn: {
+                x: 300,
+                y: 450,
+                width: 100,
+                height: 60,  // Agrega esto si no lo tienes
+                proximityRange: 150  
+            },
+            tomato: {
+                x: 400,
+                y: 450,
+                width: 100,
+                height: 60,
+                proximityRange: 150  
+            },
+            wheat: {
+                x: 500,
+                y: 450,
+                width: 100,
+                height: 60,
+                proximityRange: 150  
+            }
         };
 
         // Array para almacenar todos los cultivos plantados
@@ -55,10 +87,10 @@ class GameScene extends Phaser.Scene {
 
         // TEMPORAL: Visualizar el campo de cultivo (eliminar en producción)
         this.debugCropField = this.add.rectangle(
-            this.cropField.x,
-            this.cropField.y,
-            this.cropField.width,
-            this.cropField.height,
+            this.cropFields.x,
+            this.cropFields.y,
+            this.cropFields.width,
+            this.cropFields.height,
             0x00ff00,  // Verde
             0.2        // Transparencia
         );
@@ -113,24 +145,29 @@ class GameScene extends Phaser.Scene {
     }
         */
 
-    isPlayerNearCropField() {
-        // FORZAR actualización de posición del sprite
+    isPlayerNearAnyField() {
+        // ⭐ USAR sprite.x y sprite.y, no solo x e y
         const playerPos = {
-            x: this.player.sprite.x,  // Usar directamente del sprite
+            x: this.player.sprite.x,
             y: this.player.sprite.y
         };
 
-        const dx = playerPos.x - this.cropField.x;
-        const dy = playerPos.y - this.cropField.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+        for (let cropType in this.cropFields) {
+            const field = this.cropFields[cropType];
 
-        const isNear = distance <= this.cropField.proximityRange;
+            const dx = playerPos.x - field.x;
+            const dy = playerPos.y - field.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
 
-        console.log(`Jugador en (${playerPos.x}, ${playerPos.y}), Campo en (${this.cropField.x}, ${this.cropField.y}), Distancia: ${distance.toFixed(1)}px, Cerca: ${isNear}`);
+            if (distance <= field.proximityRange) {
+                console.log(`✅ Jugador cerca del campo ${cropType}`);
+                return true;
+            }
+        }
 
-        return isNear;
+        console.log('❌ Jugador lejos de todos los campos');
+        return false;
     }
-
 
 
 
@@ -205,7 +242,7 @@ class GameScene extends Phaser.Scene {
         gameState.spendMoney(cost);
 
         // Plantar
-        this.plantCropInCenter(cropType);
+        this.plantCropInArea(cropType);  // En lugar de plantCropInCenter
 
         // Mostrar notificación de éxito
         const seedNames = { corn: 'Maíz', tomato: 'Tomate', wheat: 'Trigo' };
@@ -333,72 +370,83 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-    plantCropInCenter(cropType = 'corn') {
-        const centerX = this.cameras.main.width / 2;
-        const groundY = 450; // Ajusta según dónde quieras el suelo
+    plantCropInArea(cropType = 'corn') {
+        const field = this.cropFields[cropType];
 
-        // Crear el cultivo en el centro
-        const crop = new Crop(this, cropType, centerX, groundY);
-
-        // Guardar referencia (puedes tener múltiples)
-        if (!this.crops) {
-            this.crops = [];
-        }
-        this.crops.push(crop);
-
-        console.log(`🌱 ${cropType} plantado en el centro`);
-
-        if (window.hud) {
-            window.hud.showNotification('🌱 Maíz plantado en el centro', 'success');
-        }
-
-        return crop;
-    }
-
-    waterAllCrops() {
-        console.log('LLAMANDO waterAllCrops de GameScene');
-        
-        // PRIMERO: Verificar proximidad
-        if (!this.isPlayerNearCropField()) {
+        // Verificar si ya existe un cultivo de ese tipo
+        const existingCrop = this.crops.find(c => c.type === cropType);
+        if (existingCrop) {
             if (window.hud) {
-                window.hud.showNotification('Acércate al campo de cultivo para regar', 'error');
+                window.hud.showNotification(`Ya hay ${cropType} plantado`, 'error');
             }
-            console.log('❌ Jugador muy lejos del campo para regar');
             return false;
         }
 
-        // SEGUNDO: Verificar que hay cultivos
+        // ⭐ Plantar en el centro del campo específico
+        const crop = new Crop(this, cropType, field.x, field.y);
+        this.crops.push(crop);
+
+        console.log(`✅ ${cropType} plantado en (${field.x}, ${field.y})`);
+        return true;
+    }
+
+    waterAllCrops() {
+        console.log('🚿 Intentando regar cultivos...');
+
+        // Verificar que hay cultivos
         if (!this.crops || this.crops.length === 0) {
             if (window.hud) {
                 window.hud.showNotification('No hay cultivos para regar', 'info');
             }
-            console.log('No hay cultivos plantados');
             return false;
         }
 
-        // TERCERO: Verificar energía
-        if (!gameState.useEnergy(5)) {
-            if (window.hud) {
-                window.hud.showNotification('Sin energía para regar', 'error');
-            }
-            return false;
-        }
+        // ⭐ NUEVO: Verificar proximidad a CADA cultivo individual
+        const playerPos = {
+            x: this.player.sprite.x,
+            y: this.player.sprite.y
+        };
 
-        // CUARTO: Regar todos los cultivos
         let wateredCount = 0;
+        const proximityRange = 100; // Distancia máxima para regar
+
         this.crops.forEach(crop => {
-            if (crop && crop.sprite && crop.sprite.active) {
+            if (!crop || !crop.sprite || !crop.sprite.active) return;
+
+            // ⭐ Calcular distancia al cultivo
+            const dx = playerPos.x - crop.x;
+            const dy = playerPos.y - crop.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // ⭐ Solo regar si está cerca
+            if (distance <= proximityRange) {
                 crop.water(30);
                 wateredCount++;
+                console.log(`💧 Regado ${crop.type} a distancia ${distance.toFixed(0)}`);
+            } else {
+                console.log(`❌ ${crop.type} muy lejos (${distance.toFixed(0)} > ${proximityRange})`);
             }
         });
 
-        if (window.hud) {
-            window.hud.showNotification(`${wateredCount} cultivo(s) regado(s) 💧`, 'success');
-        }
+        // Verificar energía SOLO si regó al menos uno
+        if (wateredCount > 0) {
+            if (!gameState.useEnergy(5)) {
+                if (window.hud) {
+                    window.hud.showNotification('Sin energía para regar', 'error');
+                }
+                return false;
+            }
 
-        console.log(`${wateredCount} cultivos regados`);
-        return true;
+            if (window.hud) {
+                window.hud.showNotification(`${wateredCount} cultivo(s) regado(s) 💧`, 'success');
+            }
+            return true;
+        } else {
+            if (window.hud) {
+                window.hud.showNotification('Acércate a los cultivos para regarlos', 'error');
+            }
+            return false;
+        }
     }
 
     updateAllCrops(weatherData) {
