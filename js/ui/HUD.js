@@ -258,6 +258,19 @@ class HUD {
         }, duration);
     }
 
+    updateDataSource(source) {
+        const sourceEmoji = {
+            'POWER': '🛰️ NASA',
+            'OpenMeteo': '🌐 Open-Meteo',
+            'offline': '📦 Local'
+        };
+
+        const sourceText = sourceEmoji[source] || '❓ Desconocido';
+
+        // Opcional: mostrar en el HUD
+        console.log(`Fuente de datos: ${sourceText}`);
+    }
+
     // Métodos de utilidad para el juego
     showPlantSuccess(cropType, cost) {
         this.showNotification(`🌱 ${cropType} plantado por ${cost} monedas`, 'success');
