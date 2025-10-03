@@ -14,7 +14,7 @@ class NasaAPI {
     // Obtener datos climáticos para una ubicación específica
     async getWeatherData(latitude, longitude, startDate, endDate) {
         const cacheKey = `weather_${latitude}_${longitude}_${startDate}_${endDate}`;
-        
+
         // Verificar cache
         if (this.cache.has(cacheKey)) {
             const cached = this.cache.get(cacheKey);
@@ -32,13 +32,13 @@ class NasaAPI {
             ].join(',');
 
             const url = `${this.powerApiUrl}` +
-                       `?parameters=${parameters}` +
-                       `&community=AG` + // Agricultura
-                       `&longitude=${longitude}` +
-                       `&latitude=${latitude}` +
-                       `&start=${startDate}` +
-                       `&end=${endDate}` +
-                       `&format=JSON`;
+                `?parameters=${parameters}` +
+                `&community=AG` + // Agricultura
+                `&longitude=${longitude}` +
+                `&latitude=${latitude}` +
+                `&start=${startDate}` +
+                `&end=${endDate}` +
+                `&format=JSON`;
 
             console.log('🌍 Obteniendo datos de NASA POWER API...');
             const response = await fetch(url);
@@ -48,7 +48,7 @@ class NasaAPI {
             }
 
             const data = await response.json();
-            
+
             // Cache the result
             this.cache.set(cacheKey, {
                 data: data,
@@ -72,29 +72,51 @@ class NasaAPI {
 
         const params = nasaData.properties.parameter;
         const dates = Object.keys(params.T2M || {});
-        
+
         if (dates.length === 0) {
             return this.getFallbackWeatherData();
         }
 
-        // Obtener datos para el día específico o el último disponible
         const targetDate = dates[Math.min(day, dates.length - 1)];
-        
+
+        // Validar que los valores sean válidos (no -999)
+        const temp = params.T2M[targetDate];
+        const precip = params.PRECTOTCORR[targetDate];
+        const solar = params.ALLSKY_SFC_SW_DWN[targetDate];
+
+        if (temp === -999 || precip === -999 || solar === -999) {
+            console.warn('Datos NASA contienen valores inválidos (-999), usando fallback');
+            return this.getFallbackWeatherData();
+        }
+
         return {
-            temperature: MathUtils.roundTo(params.T2M[targetDate] || 20, 1),
-            precipitation: MathUtils.roundTo(params.PRECTOTCORR[targetDate] || 0, 2),
-            solar: MathUtils.roundTo(params.ALLSKY_SFC_SW_DWN[targetDate] || 15, 2)
+            temperature: MathUtils.roundTo(temp, 1),
+            precipitation: MathUtils.roundTo(precip, 2),
+            solar: MathUtils.roundTo(solar, 2)
         };
     }
 
     // Obtener datos climáticos para el siguiente día del juego
-    async getNextDayWeather(latitude = 16.8634, longitude = -99.8901) { // Coordenadas por defecto: Chilpancingo
-        const today = new Date();
-        const startDate = this.formatDate(today);
-        const endDate = this.formatDate(new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)); // 7 días
+    async getNextDayWeather(latitude = 16.8634, longitude = -99.8901) {
+        try {
+            const today = new Date();
+            const startDate = this.formatDate(today);
+            const endDate = this.formatDate(new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000));
 
-        const nasaData = await this.getWeatherData(latitude, longitude, startDate, endDate);
-        return this.processWeatherData(nasaData, gameState.getDay() % 7);
+            const nasaData = await this.getWeatherData(latitude, longitude, startDate, endDate);
+            const processedData = this.processWeatherData(nasaData, gameState.getDay() % 7);
+
+            // Doble validación
+            if (processedData.temperature === -999 || processedData.solar === -999) {
+                throw new Error('Datos NASA inválidos');
+            }
+
+            return processedData;
+
+        } catch (error) {
+            console.warn('Error obteniendo datos NASA, usando fallback:', error.message);
+            return this.getFallbackWeatherData();
+        }
     }
 
     // Obtener datos históricos para análisis
@@ -103,9 +125,9 @@ class NasaAPI {
         const startDate = new Date(endDate.getTime() - daysBack * 24 * 60 * 60 * 1000);
 
         const nasaData = await this.getWeatherData(
-            latitude, 
-            longitude, 
-            this.formatDate(startDate), 
+            latitude,
+            longitude,
+            this.formatDate(startDate),
             this.formatDate(endDate)
         );
 
@@ -120,7 +142,7 @@ class NasaAPI {
 
         const params = nasaData.properties.parameter;
         const dates = Object.keys(params.T2M || {});
-        
+
         return dates.map(date => ({
             date: date,
             temperature: params.T2M[date] || 20,
@@ -131,8 +153,22 @@ class NasaAPI {
 
     // Datos de respaldo cuando la API no está disponible
     getFallbackWeatherData() {
-        console.log('🔄 Usando datos climáticos simulados');
-        return WeatherUtils.generateRandomWeather();
+        // Intentar cargar desde JSON local primero
+        const day = gameState.getDay() % 7;
+
+        // Datos hardcodeados como último recurso
+        const fallbackData = [
+            { temperature: 25, precipitation: 2, solar: 18 },
+            { temperature: 28, precipitation: 0, solar: 22 },
+            { temperature: 23, precipitation: 5, solar: 15 },
+            { temperature: 26, precipitation: 1, solar: 20 },
+            { temperature: 30, precipitation: 0, solar: 24 },
+            { temperature: 22, precipitation: 8, solar: 12 },
+            { temperature: 24, precipitation: 3, solar: 17 }
+        ];
+
+        console.log('📄 Usando datos climáticos simulados (día', day, ')');
+        return fallbackData[day];
     }
 
     // Formatear fecha para la API de NASA

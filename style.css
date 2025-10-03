@@ -596,3 +596,90 @@ canvas {
 #notification.show {
     transform: translateX(0);
 }
+
+/* ===== MENÚ DE SELECCIÓN DE SEMILLAS ===== */
+.crop-menu {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2000;
+    background: linear-gradient(135deg, 
+        rgba(15, 31, 46, 0.98) 0%, 
+        rgba(32, 58, 67, 0.98) 100%);
+    padding: 30px;
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(76, 175, 80, 0.3);
+    box-shadow: 
+        0 10px 50px rgba(0, 0, 0, 0.5),
+        0 0 100px rgba(76, 175, 80, 0.2);
+    min-width: 350px;
+}
+
+.crop-menu h3 {
+    text-align: center;
+    color: #81C784;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    text-shadow: 0 0 10px rgba(129, 199, 132, 0.5);
+}
+
+.seed-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.seed-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    background: rgba(76, 175, 80, 0.1);
+    border: 2px solid rgba(76, 175, 80, 0.3);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+    font-size: 1.1rem;
+}
+
+.seed-option:hover {
+    background: rgba(76, 175, 80, 0.2);
+    border-color: rgba(76, 175, 80, 0.6);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(76, 175, 80, 0.3);
+}
+
+.seed-option:active {
+    transform: translateY(-1px);
+}
+
+.seed-icon {
+    font-size: 2rem;
+    margin-right: 15px;
+}
+
+.seed-name {
+    flex: 1;
+    font-weight: 600;
+}
+
+.seed-cost {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+.btn.small {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.hidden {
+    opacity: 0;
+    pointer-events: none;
+    display: none !important;
+}

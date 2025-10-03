@@ -26,9 +26,14 @@ class Crop {
 
     init() {
         // Crear sprite visual del cultivo
-        this.sprite = this.scene.add.circle(this.x, this.y, 8, 0x4CAF50);
+        const spriteKey = `${this.type}_seed`;
+        this.sprite = this.scene.add.image(this.x, this.y, spriteKey);
+        this.sprite.setOrigin(0.5, 1); // Origen en la base para que crezca desde el suelo
+        this.sprite.setScale(0.3); // Ajusta según el tamaño de tus imágenes
+        this.sprite.setDepth(50); // Por encima del suelo
+
         this.updateVisual();
-        
+
         console.log(`🌱 ${this.type} plantado en posición:`, this.x, this.y);
     }
 
@@ -41,7 +46,8 @@ class Crop {
                 harvestValue: 80,
                 maturityDays: 5,
                 optimalTemp: { min: 20, max: 30 },
-                waterNeed: { min: 30, max: 80 }
+                waterNeed: { min: 30, max: 80 },
+                optimalSolar: { min: 18, max: 24 } 
             },
             corn: {
                 growthRate: 1.5,
@@ -49,7 +55,8 @@ class Crop {
                 harvestValue: 60,
                 maturityDays: 7,
                 optimalTemp: { min: 15, max: 35 },
-                waterNeed: { min: 40, max: 90 }
+                waterNeed: { min: 40, max: 90 },
+                optimalSolar: { min: 18, max: 24 }  
             },
             wheat: {
                 growthRate: 1,
@@ -57,7 +64,8 @@ class Crop {
                 harvestValue: 40,
                 maturityDays: 10,
                 optimalTemp: { min: 10, max: 25 },
-                waterNeed: { min: 20, max: 70 }
+                waterNeed: { min: 20, max: 70 },
+                optimalSolar: { min: 18, max: 24 } 
             }
         };
 
@@ -66,7 +74,7 @@ class Crop {
 
     grow(weatherData) {
         this.daysAlive++;
-        
+        this.lastSolarRadiation = weatherData.solar; 
         // Verificar condiciones para crecimiento
         if (!this.canGrow(weatherData)) {
             return;
@@ -79,7 +87,9 @@ class Crop {
         const tempModifier = this.getTemperatureModifier(weatherData.temperature);
         const waterModifier = this.getWaterModifier();
         
-        growthAmount *= tempModifier * waterModifier;
+        const solarModifier = this.getSolarModifier(weatherData.solar);
+
+        growthAmount *= tempModifier * waterModifier * solarModifier;
         
         // Aplicar crecimiento
         this.growth += growthAmount;
@@ -134,20 +144,52 @@ class Crop {
 
     getWaterModifier() {
         const waterNeed = this.cropData.waterNeed;
-        
+
         if (this.waterLevel >= waterNeed.min && this.waterLevel <= waterNeed.max) {
             return 1.0;
         }
-        
+
         if (this.waterLevel < waterNeed.min) {
             return this.waterLevel / waterNeed.min;
         }
-        
+
         // Exceso de agua también es malo
         if (this.waterLevel > waterNeed.max) {
             return Math.max(0.5, 1 - (this.waterLevel - waterNeed.max) / 50);
         }
-        
+
+        return 1.0;
+    }
+
+    getSolarModifier(solar) {
+        // Rango óptimo de radiación solar: 15-25 kW/m²/día
+        // Usar valores específicos del cultivo si existen
+        const optimalMin = this.cropData.optimalSolar?.min || 15;
+        const optimalMax = this.cropData.optimalSolar?.max || 25;
+
+
+        // Si está en rango óptimo
+        if (solar >= optimalMin && solar <= optimalMax) {
+            return 1.0; // Crecimiento normal
+        }
+
+        // Muy poca luz solar (menos de 10 kW)
+        if (solar < 10) {
+            return 0.5; // Crecimiento muy lento por falta de luz
+        }
+
+        // Poca luz (entre 10 y 15 kW)
+        if (solar < optimalMin) {
+            return 0.7 + (solar - 10) * 0.06; // Crecimiento reducido
+        }
+
+        // Mucha luz (más de 25 kW)
+        if (solar > optimalMax) {
+            // Exceso de sol puede estresar la planta
+            const excess = solar - optimalMax;
+            return Math.max(0.6, 1.0 - (excess * 0.02)); // Penalización por exceso
+        }
+
         return 1.0;
     }
 
@@ -156,14 +198,29 @@ class Crop {
         if (weatherData.temperature > 30) {
             this.waterLevel -= 2;
         }
-        
+
         // La lluvia añade agua
         if (weatherData.precipitation > 5) {
             this.waterLevel += weatherData.precipitation * 2;
         }
-        
+
+        // Exceso de agua daña la planta
+        if (this.waterLevel > 95) {
+            this.health -= 5; // Pierde salud por encharcamiento
+            console.log(`💧 ${this.type} dañado por exceso de agua`);
+        }
+
+        // Radiación excesiva daña la planta
+        if (weatherData.solar > 30) {
+            this.health -= 3;
+            console.log(`☀️ ${this.type} dañado por exceso de radiación solar`);
+        }
+
         // Mantener nivel de agua en rango válido
         this.waterLevel = Math.max(0, Math.min(100, this.waterLevel));
+
+        // Mantener salud en rango válido
+        this.health = Math.max(0, Math.min(100, this.health));
     }
 
     water(amount = 30) {
@@ -178,28 +235,95 @@ class Crop {
     updateVisual() {
         if (!this.sprite) return;
 
-        // Cambiar color basado en crecimiento y salud
+        // Determinar el sprite según crecimiento, salud y agua
+        let spriteKey = `${this.type}_`;
+
+        // Si está muerto (sin agua o muy dañado)
+        if (this.waterLevel <= 0 || this.health <= 0) {
+            spriteKey += 'dead';
+            this.sprite.setTexture(spriteKey);
+            this.sprite.setTint(0x8B4513); // Tinte marrón
+            return;
+        }
+
+        // Si está marchitándose (poca agua)
+        if (this.waterLevel < 20) {
+            // Mantener el sprite actual pero con tinte marrón
+            this.sprite.setTint(0xA0826D);
+        } else {
+            this.sprite.clearTint();
+        }
+
+        // Cambiar sprite según crecimiento
+        if (this.growth < 25) {
+            spriteKey += 'seed'; // 0-24%: Semilla
+        } else if (this.growth < 50) {
+            spriteKey += 'stage1'; // 25-49%: Plántula
+        } else if (this.growth < 75) {
+            spriteKey += 'stage2'; // 50-74%: Planta joven
+        } else {
+            spriteKey += 'mature'; // 75-100%: Planta madura
+        }
+
+        // Actualizar textura
+        this.sprite.setTexture(spriteKey);
+
+        // Efecto de marchitez por exceso de agua
+        if (this.waterLevel > 90) {
+            this.sprite.setTint(0x6B9BD1); // Tinte azulado
+        }
+
+        // Efecto de daño por radiación excesiva
+        if (this.lastSolarRadiation && this.lastSolarRadiation > 30) {
+            this.sprite.setTint(0xFFD700); // Tinte amarillento
+        }
+    }
+
+    updateCircleVisual() {
         let color;
         if (this.growth < 25) {
-            color = 0x8BC34A; // Verde claro (semilla)
+            color = 0x8BC34A;
         } else if (this.growth < 50) {
-            color = 0x4CAF50; // Verde (creciendo)
+            color = 0x4CAF50;
         } else if (this.growth < 75) {
-            color = 0x2E7D32; // Verde oscuro (casi maduro)
+            color = 0x2E7D32;
         } else {
-            color = 0xFF6B35; // Naranja (maduro)
+            color = 0xFF6B35;
         }
-        
-        // Modificar color si falta agua
+
         if (this.waterLevel < 20) {
-            color = 0x8D6E63; // Marrón (necesita agua)
+            color = 0x8D6E63;
         }
-        
+
         this.sprite.setFillStyle(color);
-        
-        // Cambiar tamaño basado en crecimiento
         const size = 8 + (this.growth / 100) * 12;
         this.sprite.setRadius(size);
+    }
+
+    updateSpriteVisual() {
+        // Determinar qué frame mostrar según el crecimiento
+        let frame;
+        if (this.growth < 25) {
+            frame = 0; // Semilla
+        } else if (this.growth < 50) {
+            frame = 1; // Planta pequeña
+        } else if (this.growth < 75) {
+            frame = 2; // Planta mediana
+        } else if (this.growth < 100) {
+            frame = 3; // Planta madura
+        } else {
+            frame = 4; // Marchita (si tienes)
+        }
+
+        // Cambiar el frame del sprite
+        this.sprite.setFrame(frame);
+
+        // Aplicar efectos visuales según condición
+        if (this.waterLevel < 20) {
+            this.sprite.setTint(0x8D6E63); // Tinte café por falta de agua
+        } else {
+            this.sprite.clearTint();
+        }
     }
 
     canHarvest() {
