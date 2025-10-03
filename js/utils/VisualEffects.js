@@ -206,90 +206,10 @@ class VisualEffects {
     }
 }
 
-/**
- * ScreenManager - Gestor de pantallas mejorado con transiciones
- */
-class ScreenManager {
-    static current = 'loading';
+
     
-    static show(screenName) {
-        // Ocultar todas las pantallas
-        document.querySelectorAll('.screen').forEach(screen => {
-            screen.classList.add('hidden');
-        });
-        
-        // Mostrar la pantalla solicitada
-        const targetScreen = document.getElementById(screenName);
-        if (targetScreen) {
-            targetScreen.classList.remove('hidden');
-            this.current = screenName;
-            
-            // Efectos específicos por pantalla
-            this.applyScreenEffects(screenName);
-        }
-    }
-    
-    static applyScreenEffects(screenName) {
-        switch(screenName) {
-            case 'menu':
-                // Ya se manejan en WelcomeManager
-                break;
-                
-            case 'game':
-                this.applyGameScreenEffects();
-                break;
-                
-            case 'tutorial':
-                this.applyTutorialEffects();
-                break;
-        }
-    }
-    
-    static applyGameScreenEffects() {
-        // Efectos sutiles para no distraer del juego
-        const hud = document.getElementById('hud');
-        if (hud) {
-            hud.style.opacity = '0';
-            hud.style.transform = 'translateY(-20px)';
-            
-            setTimeout(() => {
-                hud.style.transition = 'all 0.5s ease';
-                hud.style.opacity = '1';
-                hud.style.transform = 'translateY(0)';
-            }, 100);
-        }
-        
-        const controls = document.getElementById('game-controls');
-        if (controls) {
-            controls.style.opacity = '0';
-            controls.style.transform = 'translateY(20px)';
-            
-            setTimeout(() => {
-                controls.style.transition = 'all 0.5s ease';
-                controls.style.opacity = '1';
-                controls.style.transform = 'translateY(0)';
-            }, 300);
-        }
-    }
-    
-    static applyTutorialEffects() {
-        const tutorialContent = document.querySelector('.tutorial-content');
-        if (tutorialContent) {
-            tutorialContent.style.opacity = '0';
-            tutorialContent.style.transform = 'scale(0.95)';
-            
-            setTimeout(() => {
-                tutorialContent.style.transition = 'all 0.5s ease';
-                tutorialContent.style.opacity = '1';
-                tutorialContent.style.transform = 'scale(1)';
-            }, 200);
-        }
-    }
-    
-    static getCurrent() {
-        return this.current;
-    }
-}
+   
+
 
 /**
  * TimeUtils - Utilidades de tiempo
