@@ -1,5 +1,5 @@
 /**
- * Crop.js - Clase para los cultivos con consumo de agua aumentado
+ * Crop.js - Clase para los cultivos con escalas diferentes por etapa
  */
 
 class Crop {
@@ -9,17 +9,13 @@ class Crop {
         this.x = x;
         this.y = y;
 
-        // Estados del cultivo
         this.growth = 0;
         this.waterLevel = 50;
         this.health = 100;
         this.daysAlive = 0;
         this.lastWaterWarning = 0;
 
-        // Propiedades del tipo de cultivo
         this.cropData = this.getCropData(type);
-
-        // Sprite visual
         this.sprite = null;
 
         this.init();
@@ -29,11 +25,10 @@ class Crop {
         const spriteKey = `${this.type}_seed`;
         this.sprite = this.scene.add.image(this.x, this.y, spriteKey);
         this.sprite.setOrigin(0.5, 1);
-        this.sprite.setScale(0.05);
+        this.sprite.setScale(0.05);  // Comienza pequeña (semilla)
         this.sprite.setDepth(50);
 
         this.updateVisual();
-
         console.log(`Plantado ${this.type} en:`, this.x, this.y);
     }
 
@@ -41,7 +36,7 @@ class Crop {
         const cropTypes = {
             tomato: {
                 growthRate: 2,
-                waterConsumption: 0.8,  // Aumentado para más realismo
+                waterConsumption: 1.2,
                 harvestValue: 80,
                 maturityDays: 5,
                 optimalTemp: { min: 20, max: 30 },
@@ -50,7 +45,7 @@ class Crop {
             },
             corn: {
                 growthRate: 1.5,
-                waterConsumption: 1.0,  // Mayor consumo para maíz
+                waterConsumption: 1.5,
                 harvestValue: 60,
                 maturityDays: 7,
                 optimalTemp: { min: 15, max: 35 },
@@ -59,7 +54,7 @@ class Crop {
             },
             wheat: {
                 growthRate: 1,
-                waterConsumption: 0.6,  // Trigo consume menos pero sigue siendo significativo
+                waterConsumption: 0.9,
                 harvestValue: 40,
                 maturityDays: 10,
                 optimalTemp: { min: 10, max: 25 },
@@ -92,13 +87,12 @@ class Crop {
         this.growth += growthAmount;
         this.growth = Math.min(100, this.growth);
 
-        // Consumir agua base
         this.waterLevel -= this.cropData.waterConsumption;
 
         this.applyWeatherEffects(weatherData);
         this.updateVisual();
 
-        console.log(`${this.type} crecio: ${this.growth.toFixed(1)}%`);
+        console.log(`${this.type} crecio: ${this.growth.toFixed(1)}%, agua: ${this.waterLevel.toFixed(1)}%`);
         
         return warnings;
     }
@@ -232,44 +226,38 @@ class Crop {
         return 1.0;
     }
 
-// En el método applyWeatherEffects(), cambia la parte de la lluvia:
+    applyWeatherEffects(weatherData) {
+        if (weatherData.temperature > 32) {
+            this.waterLevel -= 2;
+        }
 
-applyWeatherEffects(weatherData) {
-    // Temperatura alta consume más agua
-    if (weatherData.temperature > 32) {
-        this.waterLevel -= 1.5;
+        if (weatherData.precipitation > 8) {
+            const rainAmount = (weatherData.precipitation - 8) * 1.5;
+            this.waterLevel += rainAmount;
+            console.log(`${this.type} recibio ${rainAmount.toFixed(1)}% agua de lluvia`);
+        }
+
+        if (this.waterLevel > 95) {
+            this.health -= 3;
+            console.log(`${this.type} danado por exceso de agua`);
+        }
+
+        if (weatherData.solar > 28) {
+            this.waterLevel -= 1;
+            this.health -= 1;
+            console.log(`${this.type} afectado por radiacion solar alta`);
+        }
+
+        this.waterLevel = Math.max(0, Math.min(100, this.waterLevel));
+        this.health = Math.max(0, Math.min(100, this.health));
     }
-
-    // La lluvia añade agua SOLO si es significativa (más realista)
-    if (weatherData.precipitation > 8) {  // Aumentado de 5 a 8
-        const rainAmount = (weatherData.precipitation - 8) * 1.5;  // Reducido de *2 a *1.5
-        this.waterLevel += rainAmount;
-        console.log(`${this.type} recibio ${rainAmount.toFixed(1)}% agua de lluvia`);
-    }
-
-    // Exceso de agua daña la planta
-    if (this.waterLevel > 95) {
-        this.health -= 3;
-        console.log(`${this.type} danado por exceso de agua`);
-    }
-
-    // Radiación excesiva consume agua adicional
-    if (weatherData.solar > 28) {
-        this.waterLevel -= 0.5;
-        this.health -= 1;
-        console.log(`${this.type} afectado por radiacion solar alta`);
-    }
-
-    this.waterLevel = Math.max(0, Math.min(100, this.waterLevel));
-    this.health = Math.max(0, Math.min(100, this.health));
-}
 
     water(amount = 30) {
         const oldLevel = this.waterLevel;
         this.waterLevel = Math.min(100, this.waterLevel + amount);
         this.updateVisual();
 
-        console.log(`${this.type} regado: ${oldLevel} → ${this.waterLevel}`);
+        console.log(`${this.type} regado: ${oldLevel.toFixed(1)} → ${this.waterLevel.toFixed(1)}`);
         return this.waterLevel - oldLevel;
     }
 
@@ -278,31 +266,40 @@ applyWeatherEffects(weatherData) {
 
         let spriteKey = `${this.type}_`;
 
+        // Plantas muertas
         if (this.waterLevel <= 0 || this.health <= 0) {
             spriteKey += 'dead';
             this.sprite.setTexture(spriteKey);
             this.sprite.setTint(0x8B4513);
+            this.sprite.setScale(0.15);  // Tamaño normal para plantas muertas
             return;
         }
 
+        // Limpiar tint antes de aplicar nuevos efectos
         if (this.waterLevel < 25) {
             this.sprite.setTint(0xA0826D);
         } else {
             this.sprite.clearTint();
         }
 
+        // Determinar etapa de crecimiento y ajustar escala
         if (this.growth < 25) {
             spriteKey += 'seed';
+            this.sprite.setScale(0.05);  // SEMILLA MUY PEQUEÑA
         } else if (this.growth < 50) {
             spriteKey += 'stage1';
+            this.sprite.setScale(0.15);  // TAMAÑO NORMAL
         } else if (this.growth < 75) {
             spriteKey += 'stage2';
+            this.sprite.setScale(0.15);  // TAMAÑO NORMAL
         } else {
             spriteKey += 'mature';
+            this.sprite.setScale(0.15);  // TAMAÑO NORMAL
         }
 
         this.sprite.setTexture(spriteKey);
 
+        // Efectos visuales por condiciones
         if (this.waterLevel > 90) {
             this.sprite.setTint(0x6B9BD1);
         }
