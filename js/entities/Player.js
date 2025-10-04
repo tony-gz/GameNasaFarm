@@ -16,6 +16,7 @@ class Player {
 
   init() {
 <<<<<<< HEAD
+<<<<<<< HEAD
     this.sprite = this.scene.add.sprite(this.x, this.y, "player", 0); // 🔥 CAMBIADO: Frame 0 (parado)
     this.sprite.setOrigin(0.5, 0.5);
     this.sprite.setScale(0.2);
@@ -31,6 +32,12 @@ class Player {
     
 >>>>>>> a2fb64aea401ec5ee983b7bf5b5acf6244f18f68
     console.log("🧑‍🌾 Jugador creado en:", this.x, this.y);
+=======
+    this.sprite = this.scene.add.sprite(this.x, this.y, 'player', 3);
+    this.sprite.setScale(0.2);
+    this.sprite.setOrigin(0.5, 0.5); // Mantén el origen centrado
+    console.log("🧑‍🌾 Jugador creado con imagen PNG en:", this.x, this.y);
+>>>>>>> df93051 (Update Player.js)
   }
 
   move(x, y) {
@@ -42,6 +49,7 @@ class Player {
     }
   }
 
+<<<<<<< HEAD
   toRight() {
     const position = this.getPosition();
     let newX;
@@ -160,6 +168,8 @@ class Player {
   }
 
 >>>>>>> a2fb64aea401ec5ee983b7bf5b5acf6244f18f68
+=======
+>>>>>>> df93051 (Update Player.js)
   // Métodos de economía que ahora usan GameState
   canAfford(cost) {
     return gameState.canAfford(cost);
@@ -254,7 +264,11 @@ class Player {
     return Math.sqrt(dx * dx + dy * dy);
   }
 <<<<<<< HEAD
+<<<<<<< HEAD
 }
 =======
 }
 >>>>>>> a2fb64aea401ec5ee983b7bf5b5acf6244f18f68
+=======
+}
+>>>>>>> df93051 (Update Player.js)
