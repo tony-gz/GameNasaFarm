@@ -1,5 +1,9 @@
 /**
+<<<<<<< HEAD
  * Player.js - Clase del jugador MODIFICADA
+=======
+ * Player.js - Clase del jugador CORREGIDA
+>>>>>>> a2fb64aea401ec5ee983b7bf5b5acf6244f18f68
  */
 
 class Player {
@@ -11,9 +15,21 @@ class Player {
   }
 
   init() {
+<<<<<<< HEAD
     this.sprite = this.scene.add.sprite(this.x, this.y, "player", 0); // 🔥 CAMBIADO: Frame 0 (parado)
     this.sprite.setOrigin(0.5, 0.5);
     this.sprite.setScale(0.2);
+=======
+    this.sprite = this.scene.add.sprite(this.x, this.y, "player", 0);
+    this.sprite.setOrigin(0.5, 1); // Origen en la base para mejor posicionamiento
+    this.sprite.setScale(0.2);
+    
+    // Iniciar con animación de parado
+    if (this.scene.anims.exists('parado')) {
+      this.sprite.play('parado', true);
+    }
+    
+>>>>>>> a2fb64aea401ec5ee983b7bf5b5acf6244f18f68
     console.log("🧑‍🌾 Jugador creado en:", this.x, this.y);
   }
 
@@ -41,14 +57,22 @@ class Player {
     const position = this.getPosition();
     let newX;
     if (position.x <= 25) {
+<<<<<<< HEAD
       newX = 20;
+=======
+      newX = 25;
+>>>>>>> a2fb64aea401ec5ee983b7bf5b5acf6244f18f68
     } else {
       newX = position.x - 2;
     }
     this.move(newX, position.y);
   }
 
+<<<<<<< HEAD
   // 🔥 NUEVO: Métodos de movimiento con herramientas
+=======
+  // Métodos de movimiento con herramientas
+>>>>>>> a2fb64aea401ec5ee983b7bf5b5acf6244f18f68
   moveRight(tool) {
     let animation;
     
@@ -64,7 +88,15 @@ class Player {
         animation = 'caminar';
     }
     
+<<<<<<< HEAD
     this.sprite.play(animation, true);
+=======
+    // Solo reproducir la animación si no está ya reproduciéndose
+    if (this.sprite.anims.currentAnim?.key !== animation || !this.sprite.anims.isPlaying) {
+      this.sprite.play(animation, true);
+    }
+    
+>>>>>>> a2fb64aea401ec5ee983b7bf5b5acf6244f18f68
     this.toRight();
     this.sprite.setFlipX(false);
   }
@@ -84,7 +116,15 @@ class Player {
         animation = 'caminar';
     }
     
+<<<<<<< HEAD
     this.sprite.play(animation, true);
+=======
+    // Solo reproducir la animación si no está ya reproduciéndose
+    if (this.sprite.anims.currentAnim?.key !== animation || !this.sprite.anims.isPlaying) {
+      this.sprite.play(animation, true);
+    }
+    
+>>>>>>> a2fb64aea401ec5ee983b7bf5b5acf6244f18f68
     this.toLeft();
     this.sprite.setFlipX(true);
   }
@@ -92,20 +132,34 @@ class Player {
   stay(tool) {
     let animation = 'parado';
     
+<<<<<<< HEAD
     // Si tiene herramienta, usar animación de caminar con herramienta
     // (esto mantiene la herramienta visible mientras está parado)
+=======
+    // Si tiene herramienta, usar animación de parado con herramienta
+>>>>>>> a2fb64aea401ec5ee983b7bf5b5acf6244f18f68
     if (tool === 'bucket') {
       animation = 'parado-balde';
     } else if (tool === 'shovel') {
       animation = 'parado-pala';
     }
     
+<<<<<<< HEAD
     this.sprite.play(animation, true);
     console.log(`🛑 Jugador en modo stay con herramienta: ${tool}`);
   }
 
   // ... (el resto de tus métodos se mantienen igual)
 
+=======
+    if (this.scene.anims.exists(animation)) {
+      this.sprite.play(animation, true);
+    }
+    
+    console.log(`🛑 Jugador parado con herramienta: ${tool}`);
+  }
+
+>>>>>>> a2fb64aea401ec5ee983b7bf5b5acf6244f18f68
   // Métodos de economía que ahora usan GameState
   canAfford(cost) {
     return gameState.canAfford(cost);
@@ -199,4 +253,8 @@ class Player {
     const dy = this.y - y;
     return Math.sqrt(dx * dx + dy * dy);
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> a2fb64aea401ec5ee983b7bf5b5acf6244f18f68
