@@ -4,6 +4,9 @@
 
 class GameScene extends Phaser.Scene {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> b72c422 (Update GameScene.js)
   constructor() {
     super({ key: "GameScene" });
     this.player = null;
@@ -13,15 +16,26 @@ class GameScene extends Phaser.Scene {
   preload() {
     console.log("🎮 Cargando GameScene...");
 
+<<<<<<< HEAD
     this.load.spritesheet("player", "assets/sheet2.png", {
       frameWidth: 444, // Ancho de cada frame
       frameHeight: 562, // Alto de cada frame
     });
+=======
+    this.load.spritesheet("player", "assets/sheet.png", {
+      frameWidth: 444, // Ancho de cada frame
+      frameHeight: 562, // Alto de cada frame
+    });
+    //this.load.image('player', 'assets/player.png');
+    // Crear pixel básico para sprites simples
+    //this.load.image('pixel', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+>>>>>>> b72c422 (Update GameScene.js)
 
     // Aquí podrían cargarse más assets en el futuro
   }
 
   create() {
+<<<<<<< HEAD
     // 🔥 NUEVO: Estados del jugador
     this.playerState = {
       tool: 'none', // 'none', 'bucket', 'shovel'
@@ -30,12 +44,24 @@ class GameScene extends Phaser.Scene {
 
     // Crear animaciones
     this.createAnimations();
+=======
+    this.anims.create({
+      key: "caminar",
+      // Especifica manualmente el orden de los frames: Fila 1: 0, 1; Fila 2: 2, 3.
+      frames: this.anims.generateFrameNumbers("player", {
+        frames: [1,2,3],
+      }),
+      frameRate: 5,
+      repeat: -1,
+    });
+>>>>>>> b72c422 (Update GameScene.js)
 
     console.log("🎮 GameScene creada");
 
     // Crear fondo
     this.createBackground();
 
+<<<<<<< HEAD
     // Crear granja
     this.farm = new Farm(this, 5, 3);
 
@@ -48,6 +74,14 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 NUEVO: Configurar eventos de animación
     this.setupAnimationEvents();
+=======
+    // Crear jugador
+    this.player = new Player(this, 100, 250);
+    this.player.sprite.play('caminar', true);
+
+    // Crear granja
+    this.farm = new Farm(this, 5, 3);
+>>>>>>> b72c422 (Update GameScene.js)
 
     // Configurar interacciones
     this.setupInteractions();
@@ -59,6 +93,7 @@ class GameScene extends Phaser.Scene {
     window.gameScene = this;
   }
 
+<<<<<<< HEAD
   // 🔥 NUEVO: Configurar eventos para todas las animaciones de caminar
   setupAnimationEvents() {
     const sprite = this.player.sprite;
@@ -149,6 +184,8 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+=======
+>>>>>>> b72c422 (Update GameScene.js)
   createBackground() {
     // Crear un fondo simple con gradiente de cielo
     const graphics = this.add.graphics();
@@ -195,6 +232,7 @@ class GameScene extends Phaser.Scene {
       H: Phaser.Input.Keyboard.KeyCodes.H, // Cosechar
       SPACE: Phaser.Input.Keyboard.KeyCodes.SPACE, // Siguiente día
     });
+<<<<<<< HEAD
 
     // 🔥 MODIFICADO: Configurar teclas para herramientas
     this.upKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
@@ -487,6 +525,33 @@ class GameScene extends Phaser.Scene {
         } else {
             this.movePlayerTowards(pointer.x, pointer.y);
 >>>>>>> a2fb64aea401ec5ee983b7bf5b5acf6244f18f68
+=======
+  }
+
+  handleSceneClick(pointer) {
+    const result = this.farm.handleClick(pointer.x, pointer.y);
+
+    if (result) {
+      this.handleFarmAction(result);
+    } else {
+      // Mover jugador hacia el clic si no es en la granja
+      this.movePlayerTowards(pointer.x, pointer.y);
+    }
+  }
+
+  handleSceneHover(pointer) {
+    // Cambiar cursor basado en lo que está debajo
+    const gridPos = this.farm.getGridPosition(pointer.x, pointer.y);
+
+    if (gridPos) {
+      const crop = this.farm.getCropAt(gridPos.x, gridPos.y);
+
+      if (crop) {
+        if (crop.canHarvest()) {
+          this.input.setDefaultCursor("pointer");
+        } else {
+          this.input.setDefaultCursor("help");
+>>>>>>> b72c422 (Update GameScene.js)
         }
       } else {
         this.input.setDefaultCursor("crosshair");
@@ -497,6 +562,9 @@ class GameScene extends Phaser.Scene {
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> b72c422 (Update GameScene.js)
   handleFarmAction(result) {
     if (result.action === "plant" && result.success) {
       hud.showPlantSuccess(result.cropType, 50);
@@ -509,6 +577,7 @@ class GameScene extends Phaser.Scene {
             hud.showCropNotReady();
             break;
           case "no_energy":
+<<<<<<< HEAD
 =======
     handleSceneHover(pointer) {
         if (!this.farm) {
@@ -703,6 +772,8 @@ class GameScene extends Phaser.Scene {
             hud.showNotification('💧 Todos los cultivos regados', 'success');
         } else {
 >>>>>>> a2fb64aea401ec5ee983b7bf5b5acf6244f18f68
+=======
+>>>>>>> b72c422 (Update GameScene.js)
             hud.showInsufficientEnergy();
             break;
           default:
@@ -738,6 +809,7 @@ class GameScene extends Phaser.Scene {
   }
 
   handleKeyboardInput() {
+<<<<<<< HEAD
     // Teclas de acceso rápido - MODIFICADO para usar el sistema de modos
     if (Phaser.Input.Keyboard.JustDown(this.keys.P)) {
       console.log("🌱 Modo plantar activado (teclado)");
@@ -764,10 +836,20 @@ class GameScene extends Phaser.Scene {
         
         console.log('🌅 Nuevo día:', gameState.getDay());
 >>>>>>> a2fb64aea401ec5ee983b7bf5b5acf6244f18f68
+=======
+    // Teclas de acceso rápido
+    if (Phaser.Input.Keyboard.JustDown(this.keys.P)) {
+      console.log("🌱 Modo plantar activado (teclado)");
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(this.keys.W)) {
+      this.waterAllCrops();
+>>>>>>> b72c422 (Update GameScene.js)
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.keys.H)) {
       console.log("🌾 Modo cosechar activado (teclado)");
+<<<<<<< HEAD
       this.changeMode('harvest');
     }
 
@@ -865,11 +947,68 @@ class GameScene extends Phaser.Scene {
     if (this.player) {
       this.player.destroy();
     }
+=======
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(this.keys.SPACE)) {
+      this.nextDay();
+    }
+  }
+
+  // Acciones del juego
+  waterAllCrops() {
+    const result = this.farm.waterAllCrops();
+    if (result) {
+      hud.showNotification("💧 Todos los cultivos regados", "success");
+    } else {
+      hud.showInsufficientEnergy();
+    }
+  }
+
+  nextDay() {
+    gameState.nextDay();
+
+    // Actualizar cultivos con el nuevo clima
+    this.farm.updateCrops(gameState.getWeather());
+
+    // Mostrar estado de la granja
+    const farmStatus = this.farm.getFarmStatus();
+    if (farmStatus.readyToHarvest > 0) {
+      hud.showNotification(
+        `🌾 ${farmStatus.readyToHarvest} cultivos listos para cosechar`,
+        "info",
+        4000
+      );
+    }
+
+    console.log("🌅 Nuevo día:", gameState.getDay());
+  }
+
+  // Métodos de utilidad
+  getFarmStatus() {
+    return this.farm ? this.farm.getFarmStatus() : null;
+  }
+
+  getPlayerStatus() {
+    return {
+      money: gameState.getMoney(),
+      energy: gameState.getEnergy(),
+      position: this.player ? this.player.getPosition() : null,
+    };
+  }
+
+  // Cleanup
+  destroy() {
+    if (this.player) {
+      this.player.destroy();
+    }
+>>>>>>> b72c422 (Update GameScene.js)
 
     if (this.farm) {
       this.farm.destroy();
     }
 
+<<<<<<< HEAD
     // Limpiar event listeners
     if (this.upKey) {
       this.upKey.removeAllListeners();
@@ -881,6 +1020,8 @@ class GameScene extends Phaser.Scene {
       this.xKey.removeAllListeners();
     }
 
+=======
+>>>>>>> b72c422 (Update GameScene.js)
     // Limpiar referencia global
     if (window.gameScene === this) {
       delete window.gameScene;
