@@ -50,7 +50,7 @@ class GameScene extends Phaser.Scene {
     create() {
         console.log('GameScene creada');
 
-        this.audio = this.sound.add('musicaFondo', {loop: true, volume: 0.8});
+        this.audio = this.sound.add('musicaFondo', {loop: true, volume: 5});
         this.audio.play();
 
         this.createAnimations();
