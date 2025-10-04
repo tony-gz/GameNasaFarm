@@ -42,10 +42,16 @@ class GameScene extends Phaser.Scene {
         this.load.image('wheat_stage3', 'assets/images/crops/wheat_stage3.png');
         this.load.image('wheat_mature', 'assets/images/crops/wheat_mature.png');
         this.load.image('wheat_dead', 'assets/images/crops/wheat_dead.png');
+
+        // Cargar musica
+        this.load.audio('musicaFondo', 'assets/carga.mp3');
     }
 
     create() {
         console.log('🎮 GameScene creada');
+
+        this.audio = this.sound.add('musicaFondo', {loop: true, volume: 0.8});
+        this.audio.play();
 
         // Crear animaciones del jugador
         this.createAnimations();
