@@ -14,26 +14,6 @@ class GameScene extends Phaser.Scene {
 
     preload() {
         console.log('🎮 Cargando GameScene...');
-<<<<<<< HEAD
-=======
-        this.load.image('corn_semilla', 'assets/data/images/crops/corn_semilla.png');
-        this.load.image('corn_germinacion', 'assets/data/images/crops/corn_germinacion.png');
-        this.load.image('corn_floracion', 'assets/data/images/crops/corn_floracion.png');
-        this.load.image('corn_maduracion', 'assets/data/images/crops/corn_maduracion.png');
-        this.load.image('corn_marchitacion', 'assets/data/images/crops/corn_marchitacion.png'); 
-
-        this.load.image('tomato_semilla', 'assets/data/images/crops/tomato_semilla.png');
-        this.load.image('tomato_germinacion', 'assets/data/images/crops/tomato_germinacion.png');
-        this.load.image('tomato_floracion', 'assets/data/images/crops/tomato_floracion.png');  
-        this.load.image('tomato_maduracion', 'assets/data/images/crops/tomato_maduracion.png');
-        this.load.image('tomato_marchitacion', 'assets/data/images/crops/tomato_marchitacion.png');
-        
-        this.load.image('wheat_semilla', 'assets/data/images/crops/wheat_semilla.png');
-        this.load.image('wheat_germinacion', 'assets/data/images/crops/wheat_germinacion.png');
-        this.load.image('wheat_floracion', 'assets/data/images/crops/wheat_floracion.png');  
-        this.load.image('wheat_maduracion', 'assets/data/images/crops/wheat_maduracion.png');
-        this.load.image('wheat_marchitacion', 'assets/data/images/crops/wheat_marchitacion.png');   
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
 
         // Cargar spritesheet del jugador
         this.load.spritesheet('player', 'assets/sheet2.png', {
@@ -69,18 +49,12 @@ class GameScene extends Phaser.Scene {
 
         // Crear animaciones del jugador
         this.createAnimations();
-<<<<<<< HEAD
 
         // IMPORTANTE: Hacer el fondo de la cámara transparente para ver BackgroundScene
-=======
-        
-        // Fondo transparente para ver BackgroundScene
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
         this.cameras.main.setBackgroundColor('rgba(0, 0, 0, 0)');
 
         // Crear jugador
         this.player = new Player(this, 40, 437);
-<<<<<<< HEAD
 
         // Definir el área del campo de cultivo
         // Reemplaza tu cropField actual por:
@@ -128,12 +102,6 @@ class GameScene extends Phaser.Scene {
         // Granja desactivada temporalmente
         this.farm = null;
         //this.farm = new Farm(this, 5, 3); // Granja de 5x3 celdas
-=======
-        
-        // Crear granja (ejemplo: 5x3 celdas)
-        this.farm = new Farm(this, 5, 3);
-        
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
         // Configurar interacciones
         this.setupInteractions();
 
@@ -302,57 +270,40 @@ class GameScene extends Phaser.Scene {
             frameRate: 5,
             repeat: -1
         });
-<<<<<<< HEAD
 
         // Animación de agarrar balde
-=======
-        // Animaciones de herramientas
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
         this.anims.create({
             key: 'agarrar-balde',
             frames: this.anims.generateFrameNumbers('player', { frames: [4, 5, 6, 7] }),
             frameRate: 6,
             repeat: 0
         });
-<<<<<<< HEAD
 
         // Animación de caminar con balde
-=======
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
         this.anims.create({
             key: 'caminar-balde',
             frames: this.anims.generateFrameNumbers('player', { frames: [8, 9, 10] }),
             frameRate: 5,
             repeat: -1
         });
-<<<<<<< HEAD
 
         // Animación de agarrar pala
-=======
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
         this.anims.create({
             key: 'agarrar-pala',
             frames: this.anims.generateFrameNumbers('player', { frames: [11, 12, 13, 14] }),
             frameRate: 6,
             repeat: 0
         });
-<<<<<<< HEAD
 
         // Animación de caminar con pala
-=======
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
         this.anims.create({
             key: 'caminar-pala',
             frames: this.anims.generateFrameNumbers('player', { frames: [15, 16, 17] }),
             frameRate: 5,
             repeat: -1
         });
-<<<<<<< HEAD
 
         // Animación de parado sin herramientas
-=======
-        // Parados
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
         this.anims.create({
             key: 'parado',
             frames: this.anims.generateFrameNumbers('player', { frames: [0] }),
@@ -380,11 +331,8 @@ class GameScene extends Phaser.Scene {
 
     setupControls() {
         this.cursors = this.input.keyboard.createCursorKeys();
-<<<<<<< HEAD
 
         // Teclas adicionales
-=======
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
         this.keys = this.input.keyboard.addKeys({
             'P': Phaser.Input.Keyboard.KeyCodes.P, // Pala
             'W': Phaser.Input.Keyboard.KeyCodes.W, // Cubeta
@@ -489,43 +437,10 @@ class GameScene extends Phaser.Scene {
             return;
         }
 
-<<<<<<< HEAD
         const result = this.farm.handleClick(pointer.x, pointer.y);
 
         if (result) {
             this.handleFarmAction(result);
-=======
-        const gridPos = this.farm.getGridPosition(pointer.x, pointer.y);
-        if (!gridPos) {
-            this.movePlayerTowards(pointer.x, pointer.y);
-            return;
-        }
-
-        const crop = this.farm.getCropAt(gridPos.x, gridPos.y);
-
-        // Si tiene pala → plantar
-        if (this.currentTool === 'shovel') {
-            const result = this.farm.attemptPlant(gridPos.x, gridPos.y, 'tomato'); 
-            if (result) this.handleFarmAction(result);
-            return;
-        }
-
-        // Si tiene cubeta → regar
-        if (this.currentTool === 'bucket') {
-            const watered = this.farm.waterCrop(gridPos.x, gridPos.y);
-            if (watered) {
-                hud.showNotification('💧 Cultivo regado', 'success');
-            } else {
-                hud.showNotification('⚠️ No hay cultivo para regar', 'error');
-            }
-            return;
-        }
-
-        // Si no tiene herramienta → cosechar
-        if (crop) {
-            const result = this.farm.attemptHarvest(gridPos.x, gridPos.y);
-            if (result) this.handleFarmAction(result);
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
         } else {
             this.movePlayerTowards(pointer.x, pointer.y);
         }
@@ -536,18 +451,12 @@ class GameScene extends Phaser.Scene {
             this.input.setDefaultCursor('default');
             return;
         }
-<<<<<<< HEAD
 
         const gridPos = this.farm.getGridPosition(pointer.x, pointer.y);
 
         if (gridPos) {
             const crop = this.farm.getCropAt(gridPos.x, gridPos.y);
 
-=======
-        const gridPos = this.farm.getGridPosition(pointer.x, pointer.y);
-        if (gridPos) {
-            const crop = this.farm.getCropAt(gridPos.x, gridPos.y);
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
             if (crop) {
                 if (crop.canHarvest()) this.input.setDefaultCursor('pointer');
                 else this.input.setDefaultCursor('help');
@@ -578,10 +487,6 @@ class GameScene extends Phaser.Scene {
     movePlayerTowards(x, y) {
         const currentPos = this.player.getPosition();
         const distance = this.player.distanceTo(x, y);
-<<<<<<< HEAD
-
-=======
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
         if (distance < 200) {
             this.tweens.add({
                 targets: this.player.sprite,
@@ -611,7 +516,6 @@ class GameScene extends Phaser.Scene {
             this.player.stay(this.currentTool);
         }
 
-<<<<<<< HEAD
         // Teclas de herramientas (una sola vez)
         /*
         if (Phaser.Input.Keyboard.JustDown(this.keys.P)) {
@@ -641,13 +545,6 @@ class GameScene extends Phaser.Scene {
         if (Phaser.Input.Keyboard.JustDown(this.keys.SPACE)) {
             this.nextDay();
         }
-=======
-        if (Phaser.Input.Keyboard.JustDown(this.keys.P)) this.pickUpTool('shovel');
-        if (Phaser.Input.Keyboard.JustDown(this.keys.W)) this.pickUpTool('bucket');
-        if (Phaser.Input.Keyboard.JustDown(this.keys.Q)) this.dropTool();
-        if (Phaser.Input.Keyboard.JustDown(this.keys.H)) console.log('🌾 Intento de cosechar con tecla H');
-        if (Phaser.Input.Keyboard.JustDown(this.keys.SPACE)) this.nextDay();
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
     }
 
     pickUpTool(tool) {
@@ -662,7 +559,6 @@ class GameScene extends Phaser.Scene {
 
     executePickUpTool(tool) {
         this.isPickingUpTool = true;
-<<<<<<< HEAD
 
         // Reproducir animación de agarrar herramienta
         const pickupAnimation = tool === 'bucket' ? 'agarrar-balde' : 'agarrar-pala';
@@ -681,15 +577,6 @@ class GameScene extends Phaser.Scene {
             const toolName = tool === 'bucket' ? 'Cubeta' : 'Pala';
             console.log(`✅ ${toolName} equipada`);
 
-=======
-        const pickupAnimation = tool === 'bucket' ? 'agarrar-balde' : 'agarrar-pala';
-        this.player.sprite.play(pickupAnimation);
-        this.player.sprite.once('animationcomplete', () => {
-            this.currentTool = tool;
-            this.isPickingUpTool = false;
-            this.player.stay(tool);
-            const toolName = tool === 'bucket' ? 'Cubeta' : 'Pala';
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
             if (window.hud) {
                 const emoji = tool === 'bucket' ? '💧' : '🌱';
                 const action = tool === 'bucket' ? 'regar' : 'plantar';
@@ -699,7 +586,6 @@ class GameScene extends Phaser.Scene {
     }
 
     dropTool() {
-<<<<<<< HEAD
         if (this.currentTool === 'none') {
             return;
         }
@@ -715,33 +601,19 @@ class GameScene extends Phaser.Scene {
         if (window.hud) {
             hud.showNotification('📦 Herramienta guardada', 'info', 1500);
         }
-=======
-        if (this.currentTool === 'none') return;
-        this.currentTool = 'none';
-        this.player.stay('none');
-        if (window.hud) hud.showNotification('📦 Herramienta guardada', 'info', 1500);
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
     }
 
     waterAllCrops() {
-<<<<<<< HEAD
         if (!this.farm) {
             console.log('⚠️ No hay granja para regar');
             return;
         }
 
         // Verificar si tiene la cubeta
-=======
-        if (!this.farm) return;
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
         if (this.currentTool !== 'bucket') {
             if (window.hud) hud.showNotification('⚠️ Necesitas equipar la cubeta (W)', 'error', 2500);
             return;
         }
-<<<<<<< HEAD
-
-=======
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
         const result = this.farm.waterAllCrops();
         if (result) hud.showNotification('💧 Todos los cultivos regados', 'success');
         else hud.showInsufficientEnergy();
@@ -749,7 +621,6 @@ class GameScene extends Phaser.Scene {
 
     async nextDay() {
         gameState.nextDay();
-<<<<<<< HEAD
 
         try {
             const newWeather = await nasaAPI.getNextDayWeather();
@@ -779,8 +650,6 @@ class GameScene extends Phaser.Scene {
         }
         
         // Actualizar cultivos solo si existe la granja
-=======
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
         if (this.farm) {
             this.farm.updateCrops(gameState.getWeather());
             const farmStatus = this.farm.getFarmStatus();
@@ -804,7 +673,6 @@ class GameScene extends Phaser.Scene {
     getCurrentTool() { return this.currentTool; }
 
     destroy() {
-<<<<<<< HEAD
         if (this.player) {
             this.player.destroy();
         }
@@ -817,11 +685,6 @@ class GameScene extends Phaser.Scene {
             delete window.gameScene;
         }
 
-=======
-        if (this.player) this.player.destroy();
-        if (this.farm) this.farm.destroy();
-        if (window.gameScene === this) delete window.gameScene;
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
         super.destroy();
     }
 }
