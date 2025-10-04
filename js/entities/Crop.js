@@ -45,10 +45,6 @@ class Crop {
                 harvestValue: 80,
                 maturityDays: 5,
                 optimalTemp: { min: 20, max: 30 },
-<<<<<<< HEAD
-                waterNeed: { min: 40, max: 80 },  // ⭐ min debe ser <= 50 (nivel inicial)
-                optimalSolar: { min: 18, max: 24 }
-=======
                 waterNeed: { min: 30, max: 80 },
                 stages: {
                     seed: 'tomato_semilla',
@@ -57,7 +53,6 @@ class Crop {
                     maturation: 'tomato_maduracion',
                     withered: 'tomato_marchitacion'
                 }
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
             },
             corn: {
                 growthRate: 1.5,
@@ -65,10 +60,6 @@ class Crop {
                 harvestValue: 60,
                 maturityDays: 7,
                 optimalTemp: { min: 15, max: 35 },
-<<<<<<< HEAD
-                waterNeed: { min: 40, max: 90 },  // ⭐ min debe ser <= 50
-                optimalSolar: { min: 18, max: 24 }
-=======
                 waterNeed: { min: 40, max: 90 },
                  stages: {
                     seed: 'corn_semilla',
@@ -77,7 +68,6 @@ class Crop {
                     maturation: 'corn_maduracion',
                     withered: 'corn_marchitacion'
                 }
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
             },
             wheat: {
                 growthRate: 1,
@@ -85,10 +75,6 @@ class Crop {
                 harvestValue: 40,
                 maturityDays: 10,
                 optimalTemp: { min: 10, max: 25 },
-<<<<<<< HEAD
-                waterNeed: { min: 30, max: 70 },  // ⭐ min debe ser <= 50
-                optimalSolar: { min: 18, max: 24 }
-=======
                 waterNeed: { min: 20, max: 70 },
                  stages: {
                     seed: 'wheat_semilla',
@@ -97,7 +83,6 @@ class Crop {
                     maturation: 'wheat_maduracion',
                     withered: 'wheat_marchitacion'
                 }
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
             }
         };
 
@@ -265,71 +250,6 @@ class Crop {
     }
 
 
-<<<<<<< HEAD
-        // Determinar el sprite según crecimiento, salud y agua
-        let spriteKey = `${this.type}_`;
-
-        // Si está muerto (sin agua o muy dañado)
-        if (this.waterLevel <= 0 || this.health <= 0) {
-            spriteKey += 'dead';
-            this.sprite.setTexture(spriteKey);
-            this.sprite.setTint(0x8B4513); // Tinte marrón
-            return;
-        }
-
-        // Si está marchitándose (poca agua)
-        if (this.waterLevel < 20) {
-            // Mantener el sprite actual pero con tinte marrón
-            this.sprite.setTint(0xA0826D);
-        } else {
-            this.sprite.clearTint();
-        }
-
-        // Cambiar sprite según crecimiento
-        if (this.growth < 25) {
-            spriteKey += 'seed'; // 0-24%: Semilla
-        } else if (this.growth < 50) {
-            spriteKey += 'stage1'; // 25-49%: Plántula
-        } else if (this.growth < 75) {
-            spriteKey += 'stage2'; // 50-74%: Planta joven
-        } else {
-            spriteKey += 'mature'; // 75-100%: Planta madura
-        }
-
-        // Actualizar textura
-        this.sprite.setTexture(spriteKey);
-
-        // Efecto de marchitez por exceso de agua
-        if (this.waterLevel > 90) {
-            this.sprite.setTint(0x6B9BD1); // Tinte azulado
-        }
-
-        // Efecto de daño por radiación excesiva
-        if (this.lastSolarRadiation && this.lastSolarRadiation > 30) {
-            this.sprite.setTint(0xFFD700); // Tinte amarillento
-        }
-    }
-
-    updateCircleVisual() {
-        let color;
-        if (this.growth < 25) {
-            color = 0x8BC34A;
-        } else if (this.growth < 50) {
-            color = 0x4CAF50;
-        } else if (this.growth < 75) {
-            color = 0x2E7D32;
-        } else {
-            color = 0xFF6B35;
-        }
-
-        if (this.waterLevel < 20) {
-            color = 0x8D6E63;
-        }
-
-        this.sprite.setFillStyle(color);
-        const size = 8 + (this.growth / 100) * 12;
-        this.sprite.setRadius(size);
-=======
     getCurrentStage() {
         if (this.isWithered) { // Prioridad: si está marchito, mostrar imagen de marchito
             return 'withered';
@@ -378,7 +298,6 @@ class Crop {
         } else {
             this.sprite.setTint(0xFFFFFF); // Color normal (sin tinte)
         }
->>>>>>> 0232d72b6562aa3bab971a8bc84d895dc3ef2f1a
     }
 
     updateSpriteVisual() {
