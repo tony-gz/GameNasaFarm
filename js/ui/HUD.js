@@ -138,20 +138,20 @@ class HUD {
 
     updateWeather() {
         const weather = gameState.getWeather();
-        
+
         if (this.elements.temperature) {
-            this.elements.temperature.textContent = Math.round(weather.temperature) + '°C';
+            this.elements.temperature.textContent = weather.temperature.toFixed(1) + '°C';
         }
-        
+
         if (this.elements.precipitation) {
-            this.elements.precipitation.textContent = Math.round(weather.precipitation * 10) / 10 + 'mm';
+            this.elements.precipitation.textContent = weather.precipitation.toFixed(1) + 'mm';
         }
-        
+
         if (this.elements.solar) {
-            this.elements.solar.textContent = Math.round(weather.solar * 10) / 10 + 'kW';
+            const solarValue = weather.solar || 18;
+            this.elements.solar.textContent = solarValue.toFixed(1) + 'kW';
         }
-        
-        // Aplicar colores según condiciones
+
         this.updateWeatherColors(weather);
     }
 
@@ -417,11 +417,36 @@ class HUD {
             panel.style.transform = 'translateX(0)';
         }, 500);
 
-        document.getElementById('refresh-realtime').addEventListener('click', () => {
-            this.refreshRealTimeWeather();
-        });
-
         const refreshBtn = document.getElementById('refresh-realtime');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                refreshBtn.textContent = '⏳ Actualizando...';
+                refreshBtn.disabled = true;
+
+                try {
+                    const weather = await weatherAPIManager.getCurrentWeather();
+                    this.updateRealTimeWeather(weather);
+
+                    refreshBtn.textContent = '✅ Actualizado';
+                    setTimeout(() => {
+                        refreshBtn.textContent = '🔄 Actualizar';
+                        refreshBtn.disabled = false;
+                    }, 2000);
+                } catch (error) {
+                    console.error('Error:', error);
+                    refreshBtn.textContent = '❌ Error';
+                    setTimeout(() => {
+                        refreshBtn.textContent = '🔄 Actualizar';
+                        refreshBtn.disabled = false;
+                    }, 2000);
+                }
+            });
+        }
+
+        
         refreshBtn.addEventListener('mouseenter', () => {
             refreshBtn.style.transform = 'scale(1.05)';
             refreshBtn.style.boxShadow = '0 4px 15px rgba(76, 175, 80, 0.4)';
