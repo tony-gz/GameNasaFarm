@@ -470,6 +470,11 @@ canvas {
     color: white !important;
 }
 
+.game-button.change-api {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+}
+
 /* ===== TUTORIAL ===== */
 #tutorial {
     max-width: 600px;
@@ -682,4 +687,43 @@ canvas {
     opacity: 0;
     pointer-events: none;
     display: none !important;
+}
+
+#weather-api-menu .seed-option {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+}
+
+#weather-api-menu .api-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+#weather-api-menu .api-description {
+    font-size: 0.9rem;
+    color: #81C784;
+    margin-bottom: 8px;
+}
+
+#weather-api-menu .api-status {
+    font-size: 0.85rem;
+    color: #FFD700;
+}
+
+#weather-api-menu .api-input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(76, 175, 80, 0.5);
+    border-radius: 5px;
+    color: white;
+    font-size: 0.9rem;
+}
+
+#weather-api-menu .api-selected {
+    border-color: #4CAF50;
+    background: rgba(76, 175, 80, 0.2);
 }

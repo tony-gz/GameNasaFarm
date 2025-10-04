@@ -13,49 +13,85 @@ class NasaAPI {
 
 
 
+
     async getClimateData(lat, lon, start, end) {
         try {
+            // Intentar NASA POWER
             const powerUrl = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M,PRECTOTCORR,ALLSKY_SFC_SW_DWN&community=AG&longitude=${lon}&latitude=${lat}&start=${start}&end=${end}&format=JSON`;
 
-            console.log('Consultando NASA POWER API...');
             const resPower = await fetch(powerUrl);
 
-            if (!resPower.ok) {
-                throw new Error(`HTTP ${resPower.status}`);
-            }
+            if (resPower.ok) {
+                const dataPower = await resPower.json();
 
-            const dataPower = await resPower.json();
+                if (dataPower.properties?.parameter || dataPower.parameters) {
+                    if (!dataPower.properties?.parameter) {
+                        dataPower.properties = { parameter: dataPower.parameters };
+                    }
 
-            // Verificar ambas ubicaciones posibles de datos
-            const hasPropertiesParam = dataPower.properties && dataPower.properties.parameter;
-            const hasDirectParam = dataPower.parameters;
+                    // Verificar que al menos una fecha tenga datos válidos
+                    const hasValidData = Object.values(dataPower.properties.parameter.T2M || {})
+                        .some(val => val !== -999 && val !== undefined);
 
-            if (hasPropertiesParam || hasDirectParam) {
-                console.log("✅ Datos obtenidos desde NASA POWER API");
-
-                // Normalizar estructura si viene en 'parameters' directo
-                if (!hasPropertiesParam && hasDirectParam) {
-                    dataPower.properties = {
-                        parameter: dataPower.parameters
-                    };
+                    if (hasValidData) {
+                        console.log("Datos desde NASA POWER");
+                        return { source: "POWER", data: dataPower };
+                    }
                 }
-
-                return {
-                    source: "POWER",
-                    data: dataPower
-                };
             }
 
-            throw new Error("Respuesta sin datos válidos");
+            throw new Error("NASA sin datos válidos");
 
         } catch (err1) {
-            console.warn("POWER API falló:", err1.message);
-            return {
-                source: "offline",
-                data: null
-            };
+            console.warn("NASA POWER falló, usando Open-Meteo...");
+
+            try {
+                return await this.getOpenMeteoData(lat, lon, start, end);
+            } catch (err2) {
+                console.warn("Open-Meteo también falló");
+                return { source: "offline", data: null };
+            }
         }
     }
+
+
+
+
+    async getOpenMeteoData(lat, lon, start, end) {
+        const startFormatted = `${start.slice(0, 4)}-${start.slice(4, 6)}-${start.slice(6, 8)}`;
+        const endFormatted = `${end.slice(0, 4)}-${end.slice(4, 6)}-${end.slice(6, 8)}`;
+
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_mean,precipitation_sum,shortwave_radiation_sum&start_date=${startFormatted}&end_date=${endFormatted}&timezone=auto`;
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`Open-Meteo HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        const converted = {
+            properties: {
+                parameter: {
+                    T2M: {},
+                    PRECTOTCORR: {},
+                    ALLSKY_SFC_SW_DWN: {}
+                }
+            }
+        };
+
+        data.daily.time.forEach((date, i) => {
+            const dateKey = date.replace(/-/g, '');
+            converted.properties.parameter.T2M[dateKey] = data.daily.temperature_2m_mean[i];
+            converted.properties.parameter.PRECTOTCORR[dateKey] = data.daily.precipitation_sum[i] || 0;
+            converted.properties.parameter.ALLSKY_SFC_SW_DWN[dateKey] = (data.daily.shortwave_radiation_sum[i] || 0) / 1000;
+        });
+
+        console.log("Datos desde Open-Meteo (respaldo)");
+        return { source: "OpenMeteo", data: converted };
+    }
+
 
 
 
@@ -66,12 +102,19 @@ class NasaAPI {
         // Verificar cache
         if (this.cache.has(cacheKey)) {
             const cached = this.cache.get(cacheKey);
-            if (Date.now() - cached.timestamp < this.cacheTimeout) {
+
+            // Verificar que el caché no sea del futuro
+            const cacheStart = parseInt(startDate);
+            const today = parseInt(this.formatDate(new Date()));
+
+            if (cacheStart > today) {
+                console.warn('Caché inválido (fechas futuras), eliminando...');
+                this.cache.delete(cacheKey);
+            } else if (Date.now() - cached.timestamp < this.cacheTimeout) {
                 console.log('📦 Usando datos climáticos en cache');
                 return cached.data;
             }
         }
-
         try {
             // Usar el nuevo sistema de fallback
             const result = await this.getClimateData(latitude, longitude, startDate, endDate);
@@ -103,85 +146,126 @@ class NasaAPI {
         }
     }
 
+
+    async getWeatherAPIData(lat, lon, start, end) {
+        // API key gratuita de https://www.weatherapi.com/
+        const apiKey = 'TU_API_KEY_AQUI'; // Obtener gratis en weatherapi.com
+
+        const startDate = `${start.slice(0, 4)}-${start.slice(4, 6)}-${start.slice(6, 8)}`;
+        const endDate = `${end.slice(0, 4)}-${end.slice(4, 6)}-${end.slice(6, 8)}`;
+
+        const url = `https://api.weatherapi.com/v1/history.json?key=${apiKey}&q=${lat},${lon}&dt=${startDate}&end_dt=${endDate}`;
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`WeatherAPI HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Convertir formato
+        const converted = {
+            properties: {
+                parameter: { T2M: {}, PRECTOTCORR: {}, ALLSKY_SFC_SW_DWN: {} }
+            }
+        };
+
+        data.forecast.forecastday.forEach(day => {
+            const dateKey = day.date.replace(/-/g, '');
+            converted.properties.parameter.T2M[dateKey] = day.day.avgtemp_c;
+            converted.properties.parameter.PRECTOTCORR[dateKey] = day.day.totalprecip_mm;
+            converted.properties.parameter.ALLSKY_SFC_SW_DWN[dateKey] = day.day.uv * 2.5; // Aproximación
+        });
+
+        console.log("Datos desde WeatherAPI");
+        return { source: "WeatherAPI", data: converted };
+    }
+
     // Procesar datos de NASA al formato del juego
     processWeatherData(nasaData, day = 0) {
-        // Verificar que tenemos datos
         if (!nasaData || !nasaData.properties || !nasaData.properties.parameter) {
-            console.warn('Datos NASA inválidos o incompletos');
+            console.warn('Datos NASA incompletos');
             return this.getFallbackWeatherData();
         }
 
         const params = nasaData.properties.parameter;
 
-        // Verificar que existan los parámetros
         if (!params.T2M || !params.PRECTOTCORR || !params.ALLSKY_SFC_SW_DWN) {
-            console.warn('Faltan parámetros en datos NASA');
+            console.warn('Faltan parámetros');
             return this.getFallbackWeatherData();
         }
 
         const dates = Object.keys(params.T2M);
 
         if (dates.length === 0) {
-            console.warn('No hay fechas en datos NASA');
             return this.getFallbackWeatherData();
         }
 
-        const targetDate = dates[Math.min(day, dates.length - 1)];
+        // Buscar la primera fecha válida empezando desde el índice solicitado
+        let validDate = null;
+        let attempts = 0;
 
-        console.log(`Procesando fecha: ${targetDate}`);
+        while (!validDate && attempts < dates.length) {
+            const targetDate = dates[(day + attempts) % dates.length];
 
-        const temp = params.T2M[targetDate];
-        const precip = params.PRECTOTCORR[targetDate];
-        const solar = params.ALLSKY_SFC_SW_DWN[targetDate];
+            const temp = params.T2M[targetDate];
+            const precip = params.PRECTOTCORR[targetDate];
+            const solar = params.ALLSKY_SFC_SW_DWN[targetDate];
 
-        // Validar valores
-        if (temp === -999 || temp === undefined ||
-            precip === -999 || precip === undefined ||
-            solar === -999 || solar === undefined) {
-            console.warn('Valores inválidos (-999 o undefined)');
-            return this.getFallbackWeatherData();
+            // Verificar si todos los valores son válidos
+            if (temp !== -999 && temp !== undefined &&
+                precip !== -999 && precip !== undefined &&
+                solar !== -999 && solar !== undefined) {
+
+                validDate = targetDate;
+
+                console.log(`Usando fecha válida: ${targetDate}`);
+
+                return {
+                    temperature: Math.round(temp * 10) / 10,
+                    precipitation: Math.round(precip * 100) / 100,
+                    solar: Math.round(solar * 100) / 100
+                };
+            }
+
+            attempts++;
+            console.warn(`Fecha ${targetDate} tiene datos inválidos, intentando siguiente...`);
         }
 
-        const result = {
-            temperature: Math.round(temp * 10) / 10,
-            precipitation: Math.round(precip * 100) / 100,
-            solar: Math.round(solar * 100) / 100
-        };
-
-        console.log('Datos procesados:', result);
-        return result;
+        // Si ninguna fecha tiene datos válidos
+        console.warn('Ninguna fecha histórica tiene datos válidos, usando fallback');
+        return this.getFallbackWeatherData();
     }
 
     // Obtener datos climáticos para el siguiente día del juego
     async getNextDayWeather(latitude = 16.8634, longitude = -99.8901) {
-        console.log('=== PRUEBA: getNextDayWeather ===');
-        console.log('Coordenadas:', latitude, longitude);
-        console.log('Día del juego:', gameState.getDay());
-
         try {
             const today = new Date();
-            const startDate = this.formatDate(today);
-            const endDate = this.formatDate(new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000));
 
-            console.log('Rango de fechas:', startDate, '-', endDate);
+            // CRÍTICO: Usar datos de hace 2 meses para evitar el futuro
+            const endDate = new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000);
+            const startDate = new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-            const nasaData = await this.getWeatherData(latitude, longitude, startDate, endDate);
+            const start = this.formatDate(startDate);
+            const end = this.formatDate(endDate);
 
-            console.log('Datos recibidos:', nasaData);
+            console.log(`Consultando datos históricos: ${start} a ${end}`);
 
-            const processedData = this.processWeatherData(nasaData, gameState.getDay() % 7);
+            const nasaData = await this.getWeatherData(latitude, longitude, start, end);
 
-            console.log('Datos procesados:', processedData);
+            // Rotar entre los 30 días disponibles
+            const dayIndex = gameState.getDay() % 30;
+            const processedData = this.processWeatherData(nasaData, dayIndex);
 
-            // Validación
-            if (processedData.temperature === -999 || processedData.solar === -999) {
-                throw new Error('Datos NASA inválidos');
+            if (processedData.temperature === -999) {
+                throw new Error('Datos inválidos en rango histórico');
             }
 
             return processedData;
 
         } catch (error) {
-            console.warn('Error obteniendo datos NASA, usando fallback:', error.message);
+            console.warn('Error NASA, usando fallback:', error.message);
             return this.getFallbackWeatherData();
         }
     }

@@ -697,6 +697,30 @@ class GameScene extends Phaser.Scene {
         console.log('🌅 Nuevo día:', gameState.getDay());
     }
 
+    async updateRealTimeWeather() {
+        try {
+            const realWeather = await weatherAPIManager.getCurrentWeather();
+
+            console.log(`Clima desde ${realWeather.source}:`, realWeather);
+
+            if (realWeather.isRaining) {
+                this.startRainEffect();
+            } else {
+                this.stopRainEffect();
+            }
+
+            if (window.hud) {
+                window.hud.updateRealTimeWeather(realWeather);
+                window.hud.showCurrentAPI(); // Mostrar API activa
+            }
+
+            this.applyCropWeatherEffects(realWeather);
+
+        } catch (error) {
+            console.error('Error actualizando clima real:', error);
+        }
+    }
+
     /*
     async nextDay() {
         gameState.nextDay();
