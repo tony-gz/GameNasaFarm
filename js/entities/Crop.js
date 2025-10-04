@@ -45,7 +45,7 @@ class Crop {
             },
             corn: {
                 growthRate: 1.5,
-                waterConsumption: 1.5,
+                waterConsumption: 1.0,  // Mayor consumo para maíz
                 harvestValue: 60,
                 maturityDays: 7,
                 optimalTemp: { min: 15, max: 35 },
@@ -251,6 +251,30 @@ class Crop {
         this.waterLevel = Math.max(0, Math.min(100, this.waterLevel));
         this.health = Math.max(0, Math.min(100, this.health));
     }
+
+    // La lluvia añade agua SOLO si es significativa (más realista)
+    if (weatherData.precipitation > 8) {  // Aumentado de 5 a 8
+        const rainAmount = (weatherData.precipitation - 8) * 1.5;  // Reducido de *2 a *1.5
+        this.waterLevel += rainAmount;
+        console.log(`${this.type} recibio ${rainAmount.toFixed(1)}% agua de lluvia`);
+    }
+
+    // Exceso de agua daña la planta
+    if (this.waterLevel > 95) {
+        this.health -= 3;
+        console.log(`${this.type} danado por exceso de agua`);
+    }
+
+    // Radiación excesiva consume agua adicional
+    if (weatherData.solar > 28) {
+        this.waterLevel -= 0.5;
+        this.health -= 1;
+        console.log(`${this.type} afectado por radiacion solar alta`);
+    }
+
+    this.waterLevel = Math.max(0, Math.min(100, this.waterLevel));
+    this.health = Math.max(0, Math.min(100, this.health));
+}
 
     water(amount = 30) {
         const oldLevel = this.waterLevel;
