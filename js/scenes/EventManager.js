@@ -26,6 +26,13 @@ class EventManager {
         document.getElementById('back-to-menu')?.addEventListener('click', () => {
             NavigationManager.backToMenu();
         });
+
+        document.getElementById('btn-realtime')?.addEventListener('click', () => {
+            // Mostrar menú de selección
+            if (weatherAPIMenu) {
+                weatherAPIMenu.show();
+            }
+        });
     }
 
     static setupGameButtons() {
@@ -43,6 +50,10 @@ class EventManager {
 
         document.getElementById('btn-next-day')?.addEventListener('click', () => {
             GameActions.nextDay();
+        });
+
+        document.getElementById('btn-change-api')?.addEventListener('click', () => {
+            GameActions.showWeatherAPIMenu();
         });
     }
 
@@ -148,28 +159,63 @@ class GameActions {
         }
 
         try {
-            const newWeather = await nasaAPI.getNextDayWeather();
-            if (window.hud && newWeather.source) {
-                window.hud.updateDataSource(newWeather.source);
-            }
-            gameState.updateWeather(newWeather);
             gameState.nextDay();
 
-            // Actualizar cultivos
-            window.gameScene.updateAllCrops(newWeather);
+            // Obtener clima de la API ACTUALMENTE SELECCIONADA
+            const currentWeather = await weatherAPIManager.getCurrentWeather();
 
-            // Mostrar clima
-            const weatherDesc = `Temp: ${newWeather.temperature}°C, Lluvia: ${newWeather.precipitation}mm, Solar: ${newWeather.solar}kW`;
+            // Actualizar GameState con estos datos
+            gameState.updateWeather({
+                temperature: currentWeather.temperature,
+                precipitation: currentWeather.precipitation,
+                solar: currentWeather.solar || 18
+            });
+
+            // Actualizar cultivos
+            window.gameScene.updateAllCrops(gameState.getWeather());
+
+            // Actualizar HUD
+            if (window.hud) {
+                window.hud.update();
+                window.hud.updateRealTimeWeather(currentWeather);
+                window.hud.updateDataSource(currentWeather.source);
+            }
+
+            // Mostrar notificación con la misma fuente
+            const weatherDesc = `${currentWeather.source} | Temp: ${currentWeather.temperature.toFixed(1)}°C, Lluvia: ${currentWeather.precipitation.toFixed(1)}mm`;
             if (window.hud) {
                 window.hud.showNotification(`Día ${gameState.getDay()}: ${weatherDesc}`, 'info', 4000);
             }
 
-            console.log('Día actualizado con clima NASA');
+            console.log(`Día actualizado con clima de ${currentWeather.source}`);
 
         } catch (error) {
             console.error('Error avanzando día:', error);
             gameState.nextDay();
         }
+    }
+    static showWeatherAPIMenu() {
+        // Verificar si existe
+        if (!window.weatherAPIMenu) {
+            console.warn('⚠️ Inicializando WeatherAPIMenu...');
+
+            // Intentar inicializar
+            if (typeof WeatherAPIMenu !== 'undefined') {
+                window.weatherAPIMenu = new WeatherAPIMenu();
+                setTimeout(() => {
+                    window.weatherAPIMenu.show();
+                }, 100);
+            } else {
+                console.error('❌ WeatherAPIMenu no está disponible');
+                if (window.hud) {
+                    window.hud.showNotification('Error: Menú no disponible', 'error');
+                }
+            }
+            return;
+        }
+
+        // Si ya existe, solo mostrar
+        window.weatherAPIMenu.show();
     }
 
 
@@ -227,6 +273,13 @@ class KeyboardHandler {
             case 'KeyH':
                 event.preventDefault();
                 GameActions.activateHarvestMode();
+                break;
+
+            case 'KeyA':
+                if (event.ctrlKey) {
+                    event.preventDefault();
+                    GameActions.showWeatherAPIMenu();
+                }
                 break;
 
             case 'KeyR':

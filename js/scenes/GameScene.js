@@ -663,17 +663,33 @@ class GameScene extends Phaser.Scene {
 
         this.updateAllCrops(gameState.getWeather());
 
-        const readyToHarvest = this.crops.filter(c => c && c.canHarvest()).length;
+        console.log('🌅 Nuevo día:', gameState.getDay());
+    }
 
-        if (window.hud && readyToHarvest > 0) {
-            window.hud.showNotification(
-                `${readyToHarvest} cultivo(s) listo(s) para cosechar`,
-                'success',
-                3000
-            );
+    /*
+    async nextDay() {
+        gameState.nextDay();
+
+        // Obtener clima real de NASA
+        try {
+            const newWeather = await nasaAPI.getNextDayWeather();
+            gameState.updateWeather(newWeather);
+            console.log('🌡️ Clima actualizado desde NASA:', newWeather);
+        } catch (error) {
+            console.warn('⚠️ Error obteniendo clima de NASA, usando datos por defecto');
         }
-
-        console.log('Nuevo dia:', gameState.getDay());
+        
+        // Actualizar cultivos solo si existe la granja
+        if (this.farm) {
+            this.farm.updateCrops(gameState.getWeather());
+            
+            const farmStatus = this.farm.getFarmStatus();
+            if (farmStatus.readyToHarvest > 0) {
+                hud.showNotification(`🌾 ${farmStatus.readyToHarvest} cultivos listos para cosechar`, 'info', 4000);
+            }
+        }
+        
+        console.log('🌅 Nuevo día:', gameState.getDay());
     }
 
     getFarmStatus() {
