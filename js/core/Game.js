@@ -1,6 +1,3 @@
-/**
- * Game.js - Clase principal que maneja Phaser y las escenas
- */
 
 class Game {
     constructor() {

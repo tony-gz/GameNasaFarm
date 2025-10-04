@@ -269,7 +269,7 @@ class LoadingManager {
             
             setTimeout(() => {
                 ScreenManager.show('menu');
-                WelcomeManager.show();
+                
                 
                 // Limpiar efectos de carga
                 const effects = document.getElementById('loading-effects');
