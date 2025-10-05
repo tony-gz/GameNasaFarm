@@ -36,12 +36,12 @@ class BackgroundScene extends Phaser.Scene {
         this.createHouse(700, 480, "casita", 0.3, 1, 1);
 
         // 8.2 Árboles de fondo - Uno de cada tipo
-        this.createTree(150, height * 0.88, "tree_round", 0.17, 0.4, 1); // Árbol redondo (más lejano)
-        this.createTree(540, height * 0.88, "tree_round", 0.17, 0.4, 1);  // Árbol alto (más cercano)
+        this.createTree(110, height * 0.88, "tree_round", 0.17, 0.4, 1); // Árbol redondo (más lejano)
+        this.createTree(565, height * 0.88, "tree_round", 0.17, 0.4, 1);  // Árbol alto (más cercano)
         
         // 9. TIERRA CON TEXTURA - Directamente después del bosque, sin césped verde
         this.createGroundLayer('grassTiles_ground', height * 0.83, 0.7, 0.07);
-        this.createLimitedGroundLayer('ground_soil', height * 0.823, 0.7, 0.07, 3, 250);
+        this.createLimitedGroundLayer('ground_soil', height * 0.823, 0.7, 0.07, 4, 125);
         this.createGroundLayer('dark_ground', height * 0.91, 0.7, 0.07);
         
         console.log('✅ BackgroundScene completada');
@@ -63,6 +63,8 @@ class BackgroundScene extends Phaser.Scene {
 
             // Transparencia
             house.setAlpha(alpha);
+
+            house.setDepth(50)
 
             // Guardar referencia si usas this.layers
             this.layers.push({
@@ -97,7 +99,7 @@ class BackgroundScene extends Phaser.Scene {
         tree.setAlpha(alpha);
 
         // Depth para que esté detrás de otros elementos
-        tree.setDepth(5);
+        tree.setDepth(10);
 
         // Guardar referencia
         this.layers.push({

@@ -1,110 +1,154 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NASA Farm Navigator</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA Farm Navigator</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<div id="game-container">
-<!-- Pantalla de carga -->
-<div id="loading" class="screen">
-<h1>🌱 NASA Farm Navigator</h1>
-<p>Cargando...</p>
-<div class="loading-bar">
-<div class="loading-progress"></div>
-</div>
-</div>
+    <div id="game-container">
+        <!-- Pantalla de carga -->
+        <div id="loading" class="screen">
+            <h1>🌱 NASA Farm Navigator</h1>
+            <p>Cargando...</p>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
 
-<!-- Menú principal -->
-<div id="menu" class="screen hidden">
-<h1>🌱 NASA Farm Navigator</h1>
-<p class="subtitle">Simulador Agrícola con Datos Reales de la NASA</p>
-<div class="menu-buttons">
-<button id="play-btn" class="btn primary">🚀 Jugar</button>
-<button id="tutorial-btn" class="btn secondary">📚 Tutorial</button>
-<button id="about-btn" class="btn secondary">ℹ️ Acerca de</button>
-</div>
-</div>
+        <!-- Menú principal -->
+        <div id="menu" class="screen hidden">
+            <h1>🌱 SPACE DREAMS</h1>
+            <p class="subtitle">Simulador Agrícola con Datos Reales de la NASA</p>
+            <div class="menu-buttons">
+                <button id="play-btn" class="btn primary">🚀 Jugar</button>
+                <button id="tutorial-btn" class="btn secondary">📚 Tutorial</button>
+                <button id="about-btn" class="btn secondary">ℹ️ Acerca de</button>
+            </div>
+        </div>
 
-<!-- Pantalla de juego -->
-<div id="game" class="screen hidden">
-<!-- HUD Superior -->
-<div id="hud">
-<div id="hud-stats">
-<div class="stat-item"><span>💰</span><span id="money">1000</span></div>
-<div class="stat-item"><span>⚡</span><span id="energy">100</span></div>
-<div class="stat-item"><span>📅</span>Día: <span id="day">1</span></div>
-<div class="stat-item"><span>🌡️</span><span id="temperature">25°C</span></div>
-<div class="stat-item"><span>☁️</span><span id="precipitation">2mm</span></div>
-<div class="stat-item"><span>☀️</span><span id="solar">18kW</span></div>
-</div>
-</div>
+        <!-- Pantalla de juego -->
+        <div id="game" class="screen hidden">
+            <!-- HUD Superior -->
+            <div id="hud">
+                <div id="hud-stats">
+                    <div class="stat-item"><span>💰</span><span id="money">1000</span></div>
+                    <div class="stat-item"><span>⚡</span><span id="energy">100</span></div>
+                    <div class="stat-item"><span>📅</span>Día: <span id="day">1</span></div>
+                    <div class="stat-item"><span>🌡️</span><span id="temperature">25°C</span></div>
+                    <div class="stat-item"><span>☁️</span><span id="precipitation">2mm</span></div>
+                    <div class="stat-item"><span>☀️</span><span id="solar">18kW</span></div>
+                </div>
+            </div>
 
-<!-- Canvas de Phaser -->
-<div id="phaser-game"></div>
+            <!-- Canvas de Phaser -->
+            <div id="phaser-game"></div>
 
-<!-- Controles inferiores -->
-<div id="game-controls">
-<button id="btn-plant" class="game-button plant">🌱 Plantar</button>
-<button id="btn-water" class="game-button water">💧 Regar</button>
-<button id="btn-harvest" class="game-button harvest">🌾 Cosechar</button>
-<button id="btn-next-day" class="game-button next-day">☀️ Siguiente Día</button>
-</div>
-</div>
+            <!-- Controles inferiores -->
+            <div id="game-controls">
+                <button id="btn-plant" class="game-button plant">🌱 Plantar</button>
+                <button id="btn-water" class="game-button water">💧 Regar</button>
+                <button id="btn-harvest" class="game-button harvest">🌾 Cosechar</button>
+                <button id="btn-next-day" class="game-button next-day">☀️ Siguiente Día</button>
+                <button id="btn-change-api" class="game-button change-api">Cambiar API</button>
+            </div>
+        </div>
 
-<!-- Tutorial -->
-<div id="tutorial" class="screen hidden">
-<h2>📚 Tutorial</h2>
-<div class="tutorial-content">
-<p>Bienvenido a NASA Farm Navigator. Aquí aprenderás a:</p>
-<ul>
-<li>🌱 Plantar cultivos usando datos satelitales reales</li>
-<li>💧 Regar de forma eficiente según el clima</li>
-<li>🌾 Cosechar para maximizar la producción</li>
-<li>📊 Interpretar datos climáticos de la NASA</li>
-</ul>
-</div>
-<button id="back-to-menu" class="btn secondary">← Volver al Menú</button>
-</div>
-</div>
+        <!-- Tutorial -->
+        <div id="tutorial" class="screen hidden">
+            <h2>📚 Tutorial</h2>
+            <div class="tutorial-content">
+                <p>Bienvenido a NASA Farm Navigator. Aquí aprenderás a:</p>
+                <ul>
+                    <li>🌱 Plantar cultivos usando datos satelitales reales</li>
+                    <li>💧 Regar de forma eficiente según el clima</li>
+                    <li>🌾 Cosechar para maximizar la producción</li>
+                    <li>📊 Interpretar datos climáticos de la NASA</li>
+                </ul>
+            </div>
+            <button id="back-to-menu" class="btn secondary">← Volver al Menú</button>
+        </div>
+    </div>
 
-<!-- Notificaciones -->
-<div id="notification"></div>
 
-<!-- Phaser.js CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.70.0/phaser.min.js"></script>
+    <!-- Menú de selección de semillas -->
+    <div id="crop-selection-menu" class="crop-menu hidden">
+        <h3>Selecciona una semilla</h3>
+        <div class="seed-options">
+            <button class="seed-option" data-crop="corn" data-cost="50">
+                <span class="seed-icon">🌽</span>
+                <span class="seed-name">Maíz</span>
+                <span class="seed-cost">50 💰</span>
+            </button>
+            <button class="seed-option" data-crop="tomato" data-cost="40">
+                <span class="seed-icon">🍅</span>
+                <span class="seed-name">Tomate</span>
+                <span class="seed-cost">40 💰</span>
+            </button>
+            <button class="seed-option" data-crop="wheat" data-cost="30">
+                <span class="seed-icon">🌾</span>
+                <span class="seed-name">Trigo</span>
+                <span class="seed-cost">30 💰</span>
+            </button>
+        </div>
+        <button id="cancel-seed-selection" class="btn secondary small">Cancelar</button>
+    </div>
 
-<!-- Utils (primero, ya que otros dependen de ellos) -->
-<script src="js/utils/helpers.js"></script>
-<script src="js/utils/NasaAPI.js"></script>
 
-<!-- Visual Effects -->
-<script src="js/utils/VisualEffects.js"></script>
 
-<!-- Core Classes -->
-<script src="js/core/GameState.js"></script>
-<script src="js/core/Game.js"></script>
+    <!-- Menú de selección de API de clima -->
+    <div id="weather-api-menu" class="crop-menu hidden">
+        <h3>Seleccionar API de Clima</h3>
+        <div id="api-options" class="seed-options"></div>
+        <button id="close-api-menu" class="btn secondary small">Cerrar</button>
+    </div>
 
-<!-- Entities -->
-<script src="js/entities/Player.js"></script>
-<script src="js/entities/Crop.js"></script>
-<script src="js/entities/Farm.js"></script>
+    <!-- Después de NasaAPI.js -->
+    <script src="js/utils/WeatherAPIManager.js"></script>
+    <script src="js/ui/WeatherAPIMenu.js"></script>
 
-<!-- UI -->
-<script src="js/ui/HUD.js"></script>
 
-<!-- Managers (nuevo) -->
-<script src="js/scenes/LoadingManager.js"></script>
-<script src="js/scenes/EventManager.js"></script>
+    <!-- Notificaciones -->
+    <div id="notification"></div>
 
-<!-- Scenes -->
-<script src="js/scenes/BackgroundScene.js"></script>
-<script src="js/scenes/MenuScene.js"></script>
-<script src="js/scenes/GameScene.js"></script>
+    <!-- Phaser.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.70.0/phaser.min.js"></script>
 
-<!-- Main Script (último) -->
-<script src="script.js"></script>
+    <!-- Utils (primero, ya que otros dependen de ellos) -->
+    <script src="js/utils/helpers.js"></script>
+    <script src="js/utils/NasaAPI.js"></script>
+    <script src="js/utils/WeatherAPIManager.js"></script> 
+
+    <!-- Visual Effects -->
+    <script src="js/utils/VisualEffects.js"></script>
+
+    <!-- Core Classes -->
+    <script src="js/core/GameState.js"></script>
+    <script src="js/core/Game.js"></script>
+
+    <!-- Entities -->
+    <script src="js/entities/Player.js"></script>
+    <script src="js/entities/Crop.js"></script>
+    <script src="js/entities/Farm.js"></script>
+
+    <!-- UI -->
+    <script src="js/ui/HUD.js"></script>
+    <script src="js/ui/WeatherAPIMenu.js"></script>
+
+    <!-- Managers (nuevo) -->
+    <script src="js/scenes/LoadingManager.js"></script>
+    <script src="js/scenes/EventManager.js"></script>
+
+    <!-- Scenes -->
+    <script src="js/scenes/BackgroundScene.js"></script>
+    <script src="js/scenes/MenuScene.js"></script>
+    <script src="js/scenes/GameScene.js"></script>
+
+    <!-- Main Script (último) -->
+    <script src="script.js"></script>
 </body>
+
 </html>

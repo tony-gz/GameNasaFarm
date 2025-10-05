@@ -12,6 +12,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Inicializar el gestor de carga
     LoadingManager.start();
+
+    // Esperar a que todo esté cargado
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            if (typeof WeatherAPIMenu !== 'undefined') {
+                window.weatherAPIMenu = new WeatherAPIMenu();
+                console.log('✅ WeatherAPIMenu inicializado correctamente');
+            } else {
+                console.error('❌ WeatherAPIMenu no está definido');
+            }
+        }, 500);
+    });
     
     // Configurar debug si está habilitado
     if (window.location.search.includes('debug=true')) {
